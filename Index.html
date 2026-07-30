@@ -1,0 +1,2052 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bitácora de Entrenamiento — J. Gustavo Aguirre</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<style>
+  :root{
+    --negro:#0B0B0C;
+    --cobre:#B8763E;
+    --cobre-claro:#D9A466;
+    --cobre-oscuro:#8A5A2C;
+    --crema:#F2EDE4;
+    --hueso:#FBF9F5;
+    --acero:#4B4E55;
+    --acero-claro:#9195A0;
+    --alerta:#8B2E2E;
+    --font-display:'Oswald', 'Arial Narrow', sans-serif;
+    --font-body:'IBM Plex Sans', system-ui, -apple-system, sans-serif;
+    --font-mono:'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    font-family:var(--font-body);
+    background:var(--crema);
+    color:var(--negro);
+    line-height:1.5;
+    padding-bottom:40px;
+  }
+  header{
+    background:
+      radial-gradient(circle at 85% -10%, rgba(184,118,62,0.18) 0%, transparent 45%),
+      repeating-linear-gradient(135deg, rgba(255,255,255,0.025) 0px, rgba(255,255,255,0.025) 1px, transparent 1px, transparent 14px),
+      var(--negro);
+    color:var(--crema);
+    padding:30px 20px 22px;
+    text-align:center;
+    border-bottom:3px solid var(--cobre);
+    position:relative;
+  }
+  .monogram{
+    width:56px;height:56px;
+    margin:0 auto 14px;
+    border:2px solid var(--cobre);
+    border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--font-display);
+    font-size:1.05rem;
+    letter-spacing:1px;
+    color:var(--cobre-claro);
+    position:relative;
+  }
+  .monogram::before{
+    content:'';
+    position:absolute;
+    inset:-7px;
+    border:1px solid rgba(184,118,62,0.35);
+    border-radius:50%;
+  }
+  header .eyebrow{
+    font-family:var(--font-mono);
+    font-size:0.65rem;
+    letter-spacing:2.5px;
+    text-transform:uppercase;
+    color:var(--cobre-claro);
+    margin-bottom:6px;
+  }
+  header h1{
+    font-family:var(--font-display);
+    font-weight:600;
+    font-size:1.55rem;
+    color:var(--hueso);
+    letter-spacing:0.5px;
+    text-transform:uppercase;
+    margin-bottom:6px;
+    line-height:1.15;
+  }
+  header p{
+    font-family:var(--font-body);
+    font-style:italic;
+    font-size:0.82rem;
+    color:var(--acero-claro);
+    letter-spacing:0.2px;
+  }
+  .cred-row{
+    display:flex;justify-content:center;gap:10px;margin-top:16px;flex-wrap:wrap;
+  }
+  .cred-pill{
+    font-family:var(--font-mono);
+    background:rgba(255,255,255,0.06);
+    border:1px solid rgba(184,118,62,0.4);
+    color:var(--crema);
+    font-size:0.62rem;
+    padding:5px 10px;
+    border-radius:3px;
+    text-transform:uppercase;
+    letter-spacing:1px;
+  }
+  main{max-width:640px;margin:0 auto;padding:18px 14px;}
+
+  .card{
+    background:#fff;
+    border-radius:6px;
+    margin-bottom:16px;
+    box-shadow:0 1px 3px rgba(11,11,12,0.08);
+    border-top:3px solid var(--cobre);
+    overflow:hidden;
+  }
+  .card-header{
+    padding:13px 16px 11px;
+    font-family:var(--font-display);
+    font-weight:500;
+    font-size:0.95rem;
+    letter-spacing:0.4px;
+    text-transform:uppercase;
+    color:var(--negro);
+    border-bottom:1px solid #EDE7DB;
+  }
+  .alert-box{
+    border-top-color:var(--alerta);
+    background:#FBEEEE;
+  }
+  .alert-box .card-header{color:var(--alerta);}
+  .alert-box .body{padding:0 16px 16px;font-size:0.88rem;}
+  .alert-box ul{padding-left:18px;margin-top:6px;}
+  .alert-box li{margin-bottom:6px;}
+  .tag-evitar{
+    display:inline-block;background:var(--alerta);color:#fff;
+    font-size:0.7rem;padding:2px 8px;border-radius:10px;margin-right:4px;
+  }
+
+  h2.section-title{
+    font-family:var(--font-display);
+    font-weight:500;
+    font-size:1rem;
+    color:var(--negro);
+    text-transform:uppercase;
+    letter-spacing:1.2px;
+    margin:28px 0 10px;
+    padding-bottom:7px;
+    border-bottom:2px solid var(--cobre);
+    display:flex;
+    align-items:baseline;
+    gap:8px;
+  }
+
+  .info-grid{
+    display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px 16px 16px;
+  }
+  .info-item{
+    background:var(--crema);border-radius:4px;padding:10px;text-align:center;border:1px solid #E9E1D2;
+  }
+  .info-item .label{font-family:var(--font-mono);font-size:0.62rem;color:var(--acero);text-transform:uppercase;letter-spacing:0.8px;}
+  .info-item .value{font-family:var(--font-display);font-size:1rem;font-weight:500;color:var(--negro);margin-top:3px;}
+
+  .day-toggle{
+    width:100%;
+    background:var(--negro);
+    color:var(--crema);
+    border:none;
+    padding:16px;
+    text-align:left;
+    font-family:var(--font-display);
+    font-size:1rem;
+    font-weight:500;
+    letter-spacing:0.6px;
+    text-transform:uppercase;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    cursor:pointer;
+  }
+  .day-toggle .arrow{
+    transition:transform 0.25s ease;
+    color:var(--cobre-claro);
+  }
+  .day-toggle.active .arrow{transform:rotate(180deg);}
+  .day-body{
+    max-height:0;
+    overflow:hidden;
+    transition:max-height 0.35s ease;
+    background:#fff;
+  }
+  .day-sub{
+    padding:10px 16px;font-size:0.78rem;color:var(--acero);
+    background:var(--crema);border-bottom:1px solid #e5ddd0;
+  }
+
+  table.exercise-table{
+    width:100%;border-collapse:collapse;font-size:0.8rem;
+  }
+  table.exercise-table th{
+    background:var(--negro);color:var(--cobre-claro);padding:8px 5px;text-align:left;
+    font-family:var(--font-mono);font-size:0.62rem;text-transform:uppercase;letter-spacing:0.6px;white-space:nowrap;
+  }
+  table.exercise-table td{
+    padding:9px 5px;border-bottom:1px solid #eee;vertical-align:top;
+  }
+  table.exercise-table tr:last-child td{border-bottom:none;}
+  .table-scroll{
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+  .log-input{
+    width:42px;
+    padding:6px 3px;
+    border:1px solid var(--acero-claro);
+    border-radius:4px;
+    font-family:var(--font-mono);
+    font-size:0.78rem;
+    text-align:center;
+    background:var(--hueso);
+  }
+  .log-input:focus{
+    outline:none;
+    border-color:var(--cobre);
+    background:#fff;
+  }
+  .day-footer-log{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:12px 16px;
+    background:var(--crema);
+    border-top:1px solid #e5ddd0;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .fecha-input{
+    padding:6px 8px;
+    border:1px solid var(--acero-claro);
+    border-radius:4px;
+    font-family:var(--font-mono);
+    font-size:0.78rem;
+  }
+  .clear-btn{
+    background:none;
+    border:1px solid var(--alerta);
+    color:var(--alerta);
+    font-size:0.72rem;
+    padding:6px 10px;
+    border-radius:6px;
+    cursor:pointer;
+  }
+  .saved-flash{
+    color:var(--cobre);
+    font-size:0.72rem;
+    font-weight:600;
+    opacity:0;
+    transition:opacity 0.3s ease;
+  }
+  .saved-flash.show{opacity:1;}
+
+  .mode-bar{
+    background:var(--negro);
+    padding:14px 16px;
+    border-radius:6px;
+    margin-bottom:16px;
+    border-top:3px solid var(--cobre);
+  }
+  .mode-toggle{
+    display:flex;
+    gap:8px;
+    margin-bottom:10px;
+  }
+  .mode-btn{
+    flex:1;
+    padding:9px;
+    border:1px solid var(--acero);
+    background:transparent;
+    color:var(--crema);
+    border-radius:4px;
+    font-family:var(--font-display);
+    font-size:0.78rem;
+    letter-spacing:0.5px;
+    text-transform:uppercase;
+    cursor:pointer;
+  }
+  .mode-btn.active{
+    background:var(--cobre);
+    border-color:var(--cobre);
+    color:var(--negro);
+    font-weight:600;
+  }
+  .name-row{
+    display:flex;
+    gap:8px;
+    align-items:center;
+  }
+  .name-row input, .name-row select{
+    flex:1;
+    padding:8px 10px;
+    border-radius:4px;
+    border:none;
+    font-family:var(--font-body);
+    font-size:0.85rem;
+  }
+  .name-row button{
+    padding:8px 12px;
+    border-radius:4px;
+    border:none;
+    background:var(--cobre);
+    color:var(--negro);
+    font-weight:600;
+    font-size:0.8rem;
+    cursor:pointer;
+  }
+  .status-note{
+    font-family:var(--font-mono);
+    font-size:0.7rem;
+    color:var(--cobre-claro);
+    margin-top:8px;
+  }
+  .warn-banner{
+    background:#3a2f1a;
+    color:#F0D9A8;
+    font-size:0.75rem;
+    padding:10px 12px;
+    border-radius:4px;
+    margin-top:8px;
+  }
+  .refresh-btn{
+    background:var(--acero);
+    color:#fff;
+    border:none;
+    padding:8px 14px;
+    border-radius:4px;
+    font-family:var(--font-display);
+    font-size:0.76rem;
+    letter-spacing:0.3px;
+    cursor:pointer;
+    margin-top:8px;
+  }
+  .readonly-input{
+    background:#eee !important;
+    color:#555;
+  }
+  .editor-day{
+    background:var(--hueso);
+    border-radius:6px;
+    padding:10px;
+    margin-bottom:10px;
+    border-left:3px solid var(--cobre);
+  }
+  .editor-day-title{
+    font-weight:700;
+    font-size:0.85rem;
+    color:var(--negro);
+    margin-bottom:8px;
+  }
+  .editor-row{
+    display:flex;
+    gap:6px;
+    margin-bottom:6px;
+    flex-wrap:wrap;
+    align-items:center;
+  }
+  .edit-input{
+    padding:6px 8px;
+    border:1px solid var(--acero-claro);
+    border-radius:4px;
+    font-family:var(--font-body);
+    font-size:0.78rem;
+  }
+  .edit-input.f-name{flex:2;min-width:110px;}
+  .edit-input.f-note{flex:2;min-width:100px;}
+  .edit-input.f-series{width:46px;}
+  .edit-input.f-reps{width:64px;}
+  .edit-input.f-rest{width:56px;}
+  .row-del-btn{
+    background:var(--alerta);
+    color:#fff;
+    border:none;
+    border-radius:4px;
+    width:28px;
+    height:28px;
+    cursor:pointer;
+    font-size:0.8rem;
+  }
+  .add-row-btn{
+    background:none;
+    border:1px dashed var(--cobre);
+    color:var(--cobre-oscuro);
+    padding:6px 10px;
+    border-radius:4px;
+    font-size:0.78rem;
+    cursor:pointer;
+    margin-top:2px;
+  }
+  .save-routine-btn{
+    width:100%;
+    background:var(--negro);
+    color:var(--cobre-claro);
+    border:none;
+    padding:13px;
+    border-radius:4px;
+    font-family:var(--font-display);
+    font-weight:600;
+    font-size:0.85rem;
+    letter-spacing:0.6px;
+    text-transform:uppercase;
+    margin-top:6px;
+    cursor:pointer;
+  }
+  .reset-routine-btn{
+    background:none;
+    border:1px solid var(--acero);
+    color:var(--acero);
+    padding:6px 10px;
+    border-radius:4px;
+    font-size:0.75rem;
+    cursor:pointer;
+    margin-bottom:10px;
+  }
+  .ex-name{font-family:var(--font-display);font-weight:500;letter-spacing:0.2px;}
+  .ex-note{font-size:0.72rem;color:var(--acero);display:block;margin-top:2px;font-style:italic;}
+  .video-link{
+    display:block;
+    font-size:0.72rem;
+    color:var(--cobre);
+    margin-top:3px;
+    text-decoration:none;
+    font-weight:600;
+  }
+  .video-link:active{opacity:0.7;}
+  .exercise-picker{
+    background:#EFEAE0;
+    border-radius:6px;
+    padding:10px;
+    margin-bottom:12px;
+    border-left:3px solid var(--cobre);
+  }
+  .picker-row{
+    display:flex;
+    gap:6px;
+    flex-wrap:wrap;
+    align-items:center;
+  }
+  .picker-row select{
+    flex:1;
+    min-width:90px;
+    padding:7px;
+    border-radius:4px;
+    border:1px solid var(--acero-claro);
+    font-family:var(--font-body);
+    font-size:0.78rem;
+  }
+  .picker-row button{
+    background:var(--cobre);
+    color:var(--negro);
+    border:none;
+    padding:7px 12px;
+    border-radius:4px;
+    font-family:var(--font-display);
+    font-weight:600;
+    font-size:0.78rem;
+    cursor:pointer;
+  }
+
+  .rpe-note{
+    padding:12px 16px;font-size:0.78rem;background:#FFF7EC;color:var(--negro);
+    border-top:1px dashed var(--cobre);
+  }
+
+  .save-session-btn{
+    background:var(--cobre);
+    color:var(--negro);
+    border:none;
+    padding:7px 11px;
+    border-radius:4px;
+    font-family:var(--font-display);
+    font-weight:500;
+    font-size:0.7rem;
+    letter-spacing:0.3px;
+    cursor:pointer;
+  }
+  #history-day-filter{
+    width:100%;
+    padding:8px;
+    border-radius:4px;
+    border:1px solid var(--acero-claro);
+    font-family:var(--font-body);
+    font-size:0.82rem;
+    margin-bottom:10px;
+  }
+  .history-entry{
+    background:var(--hueso);
+    border-left:3px solid var(--cobre);
+    border-radius:6px;
+    padding:10px 12px;
+    margin-bottom:10px;
+  }
+  .history-entry-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    font-family:var(--font-mono);
+    font-size:0.68rem;
+    color:var(--cobre-oscuro);
+    text-transform:uppercase;
+    letter-spacing:0.5px;
+    margin-bottom:8px;
+  }
+  .history-entry-head .h-date{font-weight:600;color:var(--negro);}
+  table.history-table{
+    width:100%;border-collapse:collapse;font-size:0.78rem;
+  }
+  table.history-table th{
+    font-family:var(--font-mono);font-size:0.6rem;text-transform:uppercase;
+    color:var(--acero);text-align:left;padding:4px 4px;border-bottom:1px solid #ddd;letter-spacing:0.4px;
+  }
+  table.history-table td{
+    padding:5px 4px;font-family:var(--font-mono);font-size:0.76rem;border-bottom:1px solid #eee;
+  }
+  .history-empty{font-size:0.8rem;color:var(--acero);padding:6px 2px;}
+
+  .intake-q{
+    margin-bottom:12px;
+  }
+  .intake-q label{
+    display:block;
+    font-size:0.8rem;
+    color:var(--negro);
+    margin-bottom:5px;
+    font-weight:600;
+  }
+  .intake-q select{
+    width:100%;
+    padding:9px 10px;
+    border-radius:4px;
+    border:1px solid var(--acero-claro);
+    font-family:var(--font-body);
+    font-size:0.82rem;
+    background:#fff;
+  }
+  .intake-summary{
+    background:var(--negro);
+    color:var(--crema);
+    border-radius:6px;
+    border-left:3px solid var(--cobre);
+    padding:12px 14px;
+    margin:14px 0;
+    font-size:0.82rem;
+  }
+  .intake-summary strong{color:var(--cobre-claro);}
+  table.landmark-table{
+    width:100%;border-collapse:collapse;font-size:0.78rem;
+  }
+  table.landmark-table th{
+    font-family:var(--font-mono);font-size:0.62rem;text-transform:uppercase;
+    color:#fff;background:var(--acero);text-align:center;padding:6px 4px;letter-spacing:0.4px;
+  }
+  table.landmark-table th:first-child{text-align:left;}
+  table.landmark-table td{
+    padding:7px 4px;border-bottom:1px solid #eee;font-family:var(--font-mono);text-align:center;
+  }
+  table.landmark-table td:first-child{
+    text-align:left;font-family:var(--font-display);font-size:0.78rem;color:var(--negro);
+  }
+  .set-inputs{
+    display:flex;gap:3px;flex-wrap:wrap;
+  }
+  .set-input{width:34px !important;}
+  .set-input-label{
+    font-family:var(--font-mono);font-size:0.55rem;color:var(--acero);display:block;text-align:center;
+  }
+
+  #chart-exercise-select{
+    width:100%;padding:8px;border-radius:4px;border:1px solid var(--acero-claro);
+    font-family:var(--font-body);font-size:0.82rem;margin-bottom:10px;
+  }
+  .chart-wrap{position:relative;height:230px;}
+
+  .notes-label{
+    display:block;font-family:var(--font-display);font-size:0.8rem;text-transform:uppercase;
+    letter-spacing:0.4px;color:var(--negro);margin-bottom:6px;margin-top:14px;
+  }
+  .notes-label:first-child{margin-top:0;}
+  textarea.notes-area{
+    width:100%;min-height:80px;padding:10px;border-radius:4px;border:1px solid var(--acero-claro);
+    font-family:var(--font-body);font-size:0.82rem;resize:vertical;background:var(--hueso);
+  }
+  textarea.notes-area.readonly-input{background:#eee;color:#555;}
+
+  .reminder-form{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
+  .reminder-form input[type="text"]{flex:2;min-width:140px;padding:8px;border-radius:4px;border:1px solid var(--acero-claro);font-family:var(--font-body);font-size:0.82rem;}
+  .reminder-form input[type="date"]{flex:1;min-width:120px;padding:8px;border-radius:4px;border:1px solid var(--acero-claro);font-family:var(--font-mono);font-size:0.78rem;}
+  .reminder-form button{background:var(--cobre);color:var(--negro);border:none;padding:8px 12px;border-radius:4px;font-family:var(--font-display);font-weight:600;font-size:0.78rem;cursor:pointer;}
+  .reminder-item{
+    display:flex;align-items:flex-start;gap:8px;padding:9px 4px;border-bottom:1px solid #eee;
+  }
+  .reminder-item.done .reminder-text{text-decoration:line-through;color:var(--acero-claro);}
+  .reminder-text{flex:1;font-size:0.85rem;}
+  .reminder-meta{font-family:var(--font-mono);font-size:0.65rem;color:var(--acero);display:block;margin-top:2px;}
+  .reminder-del{background:none;border:none;color:var(--alerta);font-size:0.9rem;cursor:pointer;}
+
+  ul.guideline-list{padding-left:18px;font-size:0.85rem;}
+  ul.guideline-list li{margin-bottom:8px;}
+
+  .foda-footer{
+    text-align:center;margin-top:30px;padding:22px 10px 10px;
+    color:var(--acero);font-size:0.72rem;
+    border-top:1px solid #E2DAC8;
+  }
+  .foda-footer .plate-name{
+    font-family:var(--font-display);
+    font-size:0.95rem;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    color:var(--negro);
+    display:block;
+    margin-bottom:4px;
+  }
+  .foda-footer .plate-cred{
+    font-family:var(--font-mono);
+    font-size:0.65rem;
+    letter-spacing:0.5px;
+    color:var(--cobre-oscuro);
+  }
+
+  .progress-note{
+    background:var(--negro);color:var(--crema);border-radius:6px;
+    border-left:3px solid var(--cobre);
+    padding:16px;font-size:0.85rem;margin-top:6px;
+  }
+  .progress-note strong{color:var(--cobre-claro);}
+
+  @media (max-width:380px){
+    .info-grid{grid-template-columns:1fr 1fr;}
+    header h1{font-size:1.25rem;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="monogram">JGA</div>
+  <div class="eyebrow">Bitácora de entrenamiento</div>
+  <h1>Jesús Gustavo Aguirre</h1>
+  <p>Rigor técnico. Acompañamiento cercano. Resultados que se sostienen.</p>
+  <div class="cred-row">
+    <span class="cred-pill">Coach Fitness Integral</span>
+    <span class="cred-pill">RENAEF</span>
+    <span class="cred-pill">Durango, México</span>
+  </div>
+</header>
+
+<main>
+
+  <div class="mode-bar">
+    <div class="mode-toggle">
+      <button class="mode-btn" id="btn-mode-cliente" onclick="setMode('cliente')">👤 Soy cliente</button>
+      <button class="mode-btn" id="btn-mode-entrenador" onclick="setMode('entrenador')">🏋️ Soy el entrenador</button>
+    </div>
+
+    <div id="cliente-panel" style="display:none;">
+      <div class="name-row">
+        <input type="text" id="cliente-nombre-input" placeholder="Escribe tu nombre">
+        <button onclick="setClientName()">Guardar</button>
+      </div>
+      <div class="status-note" id="cliente-status"></div>
+    </div>
+
+    <div id="entrenador-panel" style="display:none;">
+      <div class="name-row">
+        <select id="cliente-selector" onchange="loadClientData()">
+          <option value="">Selecciona un cliente…</option>
+        </select>
+        <button onclick="refreshClientList()">🔄</button>
+      </div>
+      <div class="name-row" style="margin-top:8px;">
+        <input type="text" id="nuevo-cliente-input" placeholder="Nombre del cliente nuevo">
+        <button onclick="registerNewClient()">+ Registrar</button>
+      </div>
+      <div class="status-note" id="entrenador-status"></div>
+      <div id="profile-editor-section" style="display:none;margin-top:10px;">
+        <button class="refresh-btn" id="toggle-profile-editor-btn" onclick="toggleProfileEditor()">✏️ Editar objetivo y perfil de este cliente</button>
+        <div id="profile-editor" style="display:none;margin-top:8px;"></div>
+      </div>
+      <div id="editor-section" style="display:none;margin-top:10px;">
+        <button class="refresh-btn" id="toggle-editor-btn" onclick="toggleEditor()">✏️ Editar rutina de este cliente</button>
+        <div id="routine-editor" style="display:none;"></div>
+      </div>
+    </div>
+
+    <div class="warn-banner" id="no-sync-warning" style="display:none;">
+      ⚠ Este archivo se abrió sin conexión al almacenamiento compartido de Claude (por ejemplo, si se abrió como archivo descargado en vez del enlace compartido). Los datos solo se guardarán en este teléfono y no se sincronizarán.
+    </div>
+  </div>
+
+  <h2 class="section-title">Entrevista inicial</h2>
+  <div class="card">
+    <div class="card-header">Capacidad de recuperación y volumen inicial</div>
+    <div style="padding:14px 16px;">
+      <p style="font-size:0.8rem;color:var(--acero);margin-bottom:14px;">
+        Responde estas preguntas una vez. Con base en tus respuestas se calcula un punto de partida orientativo para tu volumen de entrenamiento (MEV / MAV / MRV) por grupo muscular. El entrenador puede ajustarlo después según tu respuesta real al entrenamiento.
+      </p>
+      <div id="intake-questions"></div>
+      <div id="intake-summary-container"></div>
+      <div id="landmark-table-container"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">Objetivo y perfil del cliente</div>
+    <div class="info-grid" id="profile-container"></div>
+  </div>
+
+  <h2 class="section-title">Rutina semanal</h2>
+  <div class="card" style="border-left-color:var(--acero);">
+    <div class="body" style="padding:12px 16px;font-size:0.8rem;color:var(--acero);">
+      📝 Al final de cada ejercicio hay campos para anotar el <strong>peso usado</strong>, las <strong>repeticiones realizadas</strong> y tu <strong>RPE</strong> (qué tan pesado sentiste el ejercicio, en escala de 1 a 10). Estos campos se guardan solos y muestran siempre tu dato más reciente. Cuando termines tu sesión del día, pulsa <strong>"💾 Guardar sesión en historial"</strong> al final de ese día para que quede registrada esa fecha en tu progresión — así se puede ver cómo avanzas semana a semana, no solo el último dato. Tu entrenador ve todo esto desde su propio teléfono.
+    </div>
+  </div>
+
+  <div id="day-container"></div>
+
+  <h2 class="section-title">Historial de sesiones</h2>
+  <div class="card">
+    <div class="card-header">Progresión semana a semana</div>
+    <div style="padding:14px 16px;">
+      <select id="history-day-filter" onchange="renderHistoryList()">
+        <option value="all">Todos los días</option>
+        <option value="1">Día 1</option>
+        <option value="2">Día 2</option>
+        <option value="3">Día 3</option>
+        <option value="4">Día 4</option>
+        <option value="5">Día 5</option>
+      </select>
+      <div id="history-list"><div class="history-empty">Todavía no hay sesiones guardadas en el historial.</div></div>
+    </div>
+  </div>
+
+  <h2 class="section-title">Gráfica de progreso</h2>
+  <div class="card">
+    <div class="card-header">Evolución del peso por ejercicio</div>
+    <div style="padding:14px 16px;">
+      <select id="chart-exercise-select" onchange="renderProgressChart()">
+        <option value="">Selecciona un ejercicio…</option>
+      </select>
+      <div class="chart-wrap"><canvas id="progress-chart"></canvas></div>
+      <div id="chart-empty-msg" class="history-empty">Guarda al menos 2 sesiones con el mismo ejercicio para ver su progreso aquí.</div>
+    </div>
+  </div>
+
+  <h2 class="section-title">Notas</h2>
+  <div class="card">
+    <div class="card-header">Notas del entrenador y del cliente</div>
+    <div style="padding:14px 16px;">
+      <label class="notes-label">Notas del entrenador</label>
+      <textarea class="notes-area" id="trainer-notes" placeholder="Observaciones, ajustes, técnica a corregir..." onchange="saveNotes()"></textarea>
+      <label class="notes-label">Notas del cliente</label>
+      <textarea class="notes-area" id="client-notes" placeholder="Molestias, dudas, cómo te sentiste..." onchange="saveNotes()"></textarea>
+    </div>
+  </div>
+
+  <h2 class="section-title">Recordatorios</h2>
+  <div class="card">
+    <div class="card-header">Pendientes</div>
+    <div style="padding:14px 16px;">
+      <p style="font-size:0.72rem;color:var(--acero);margin-bottom:10px;">Estos recordatorios aparecen aquí al abrir la bitácora — no son notificaciones push del teléfono.</p>
+      <div class="reminder-form">
+        <input type="text" id="reminder-text-input" placeholder="Nuevo recordatorio">
+        <input type="date" id="reminder-date-input">
+        <button onclick="addReminder()">+ Agregar</button>
+      </div>
+      <div id="reminders-list"><div class="history-empty">No hay recordatorios todavía.</div></div>
+    </div>
+  </div>
+
+  <h2 class="section-title">Progresión</h2>
+  <div class="progress-note">
+    <strong>Progresión doble (reps → carga):</strong> primero aumenta repeticiones dentro del rango indicado manteniendo la misma carga. Cuando alcance el límite superior del rango en todas las series durante 2 sesiones seguidas, sube la carga un incremento pequeño y vuelve al límite inferior del rango. Revisar y ajustar cada 2 semanas.
+  </div>
+
+  <h2 class="section-title">Lineamientos generales</h2>
+  <div class="card">
+    <div class="body" style="padding:14px 16px;">
+      <ul class="guideline-list">
+        <li>Respiración continua en cada repetición: exhalar en el esfuerzo, inhalar en el retorno. Evitar contener el aire.</li>
+        <li>Tempo controlado (aprox. 2-1-2): bajar en 2 segundos, pausa breve, subir en 2 segundos, salvo indicación distinta del entrenador.</li>
+        <li>Hidratación antes, durante y después de la sesión.</li>
+        <li>Si en cualquier momento hay dolor, mareo o molestia inusual, detener el ejercicio y avisar al entrenador.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="foda-footer">
+    <span class="plate-name">Jesús Gustavo Aguirre</span>
+    <span class="plate-cred">Entrenador Personal Certificado · Coach Fitness Integral · RENAEF · Durango, México</span>
+  </div>
+
+</main>
+
+<script>
+function toggleDay(btn){
+  btn.classList.toggle('active');
+  const body = btn.nextElementSibling;
+  if(body.style.maxHeight){
+    body.style.maxHeight = null;
+  } else {
+    body.style.maxHeight = body.scrollHeight + "px";
+  }
+}
+
+// --- Detección de almacenamiento compartido de Claude ---
+const storageAvailable = (typeof window.storage !== 'undefined' && window.storage !== null);
+
+async function localGet(key){
+  if(storageAvailable){
+    try{ const r = await window.storage.get(key, false); return r ? r.value : null; }catch(e){ return null; }
+  }
+  return localStorage.getItem(key);
+}
+async function localSet(key, value){
+  if(storageAvailable){
+    try{ await window.storage.set(key, value, false); }catch(e){}
+  } else {
+    localStorage.setItem(key, value);
+  }
+}
+async function sharedGet(key){
+  if(storageAvailable){
+    try{ const r = await window.storage.get(key, true); return r ? r.value : null; }catch(e){ return null; }
+  }
+  return localStorage.getItem(key); // sin sincronización real si no hay storageAvailable
+}
+async function sharedSet(key, value){
+  if(storageAvailable){
+    try{ await window.storage.set(key, value, true); }catch(e){}
+  } else {
+    localStorage.setItem(key, value);
+  }
+}
+
+function escapeHtml(str){
+  if(str === undefined || str === null) return '';
+  return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+// --- Rutina general (plantilla por defecto para clientes sin rutina propia todavía) ---
+const DEFAULT_ROUTINE = {
+  days: [
+    { title:"DÍA 1", warmup:"", rpeNote:"", exercises:[] },
+    { title:"DÍA 2", warmup:"", rpeNote:"", exercises:[] },
+    { title:"DÍA 3", warmup:"", rpeNote:"", exercises:[] },
+    { title:"DÍA 4", warmup:"", rpeNote:"", exercises:[] },
+    { title:"DÍA 5", warmup:"", rpeNote:"", exercises:[] }
+  ]
+};
+
+// --- Perfil/objetivo por defecto (en blanco hasta que el entrenador lo defina por cliente) ---
+const DEFAULT_PROFILE = {
+  objetivo: "", enfoque: "", frecuencia: "", estructura: "", rangoReps: "", rpe: ""
+};
+
+// --- Biblioteca de ejercicios de gimnasio, por tipo de equipo ---
+const EXERCISE_LIBRARY = {
+  "Máquinas": [
+    "Prensa de piernas horizontal","Prensa de piernas 45°","Prensa de piernas vertical","Sentadilla Hack (hack squat)","Sentadilla en máquina Smith","Sentadilla búlgara en máquina Smith","Zancada en máquina Smith","Extensión de cuádriceps en máquina","Curl femoral en máquina acostado","Curl femoral en máquina sentado","Curl femoral en máquina de pie (unilateral)","Abducción de cadera en máquina","Aducción de cadera en máquina","Elevación de talones en máquina de pie","Elevación de talones en máquina sentado","Elevación de talones en prensa de piernas","Hip thrust en máquina","Máquina de glúteo (glute drive)","Patada de glúteo en máquina (glute kickback)",
+    "Press de pecho en máquina (convergente)","Press de pecho en máquina (placas)","Press inclinado en máquina","Press declinado en máquina","Pec deck / Contractora de pecho","Press de banca en máquina Smith (plano)","Press de banca en máquina Smith (inclinado)","Press de banca en máquina Smith (declinado)",
+    "Jalón al pecho en máquina (agarre ancho)","Jalón al pecho en máquina (agarre cerrado)","Remo en máquina (agarre neutro)","Remo en máquina (placas, horizontal)","Remo T en máquina (T-bar row)","Pull-over en máquina","Hiperextensión en banco romano","Máquina de jalón asistido para dominadas","Peso muerto en máquina Smith",
+    "Press de hombro en máquina","Press de hombro en máquina Smith","Elevación lateral en máquina","Máquina de deltoide posterior (reverse pec deck)","Encogimientos (shrugs) en máquina Smith",
+    "Curl de bíceps en máquina","Curl Scott / predicador en máquina","Extensión de tríceps en máquina","Fondos en máquina (dip asistido)","Press francés en máquina",
+    "Máquina de abdominales (crunch)","Máquina de giro de torso","Elevación de piernas en máquina con soporte"
+  ],
+  "Peso libre — Barra": [
+    "Sentadilla trasera con barra (back squat)","Sentadilla frontal con barra (front squat)","Sentadilla en Smith","Sentadilla sumo con barra","Sentadilla búlgara con barra","Sentadilla zercher","Sentadilla caja (box squat)","Sentadilla con barra libre (high bar)","Sentadilla con barra libre (low bar)",
+    "Peso muerto convencional","Peso muerto sumo","Peso muerto rumano con barra","Peso muerto rígido (stiff-leg deadlift)","Peso muerto déficit","Buenos días (good morning) con barra","Zancadas con barra","Zancadas caminando con barra","Hip thrust con barra","Puente de glúteo con barra",
+    "Press de banca plano con barra","Press de banca inclinado con barra","Press de banca declinado con barra","Press de banca agarre cerrado","Press guillotina (al cuello)","Pullover con barra",
+    "Remo con barra (bent-over row)","Remo Pendlay","Remo Yates (agarre supino)","Dominadas lastradas con barra/cinturón","Encogimientos con barra (shrugs)",
+    "Press militar con barra de pie","Press militar sentado con barra","Press tras nuca con barra","Remo al mentón con barra (upright row)",
+    "Curl de bíceps con barra recta","Curl de bíceps con barra Z","Curl 21s con barra","Press francés con barra (skull crusher)","Press cerrado con barra (close grip bench)",
+    "Cargada de potencia (power clean)","Arrancada (snatch)","Push press con barra","Thruster con barra"
+  ],
+  "Peso libre — Mancuerna": [
+    "Sentadilla goblet","Sentadilla búlgara con mancuernas","Sentadilla sumo con mancuerna","Zancadas con mancuernas","Zancadas caminando con mancuernas","Step-up con mancuernas","Peso muerto rumano con mancuernas","Peso muerto piernas rígidas con mancuernas","Elevación de talones de pie con mancuernas","Hip thrust unilateral con mancuerna",
+    "Press de pecho plano con mancuernas","Press de pecho inclinado con mancuernas","Press de pecho declinado con mancuernas","Aperturas planas con mancuernas (flyes)","Aperturas inclinadas con mancuernas","Pullover con mancuerna","Press Svend",
+    "Remo con mancuerna a una mano (unilateral)","Remo Kroc","Remo renegado (renegade row)","Encogimientos con mancuernas (shrugs)",
+    "Press de hombro con mancuernas (sentado)","Press Arnold","Elevaciones laterales con mancuernas","Elevaciones frontales con mancuernas","Vuelos posteriores con mancuernas (rear delt fly)","Press Cubano (Cuban press)",
+    "Curl de bíceps con mancuernas (alterno)","Curl martillo con mancuernas","Curl concentrado con mancuerna","Curl inclinado con mancuernas (incline curl)","Extensión de tríceps a dos manos (overhead)","Patada de tríceps con mancuerna (kickback)","Press francés con mancuernas",
+    "Russian twist con mancuerna","Side bend con mancuerna"
+  ],
+  "Poleas (cable)": [
+    "Patada de glúteo en polea (cable kickback)","Abducción de cadera en polea","Peso muerto rumano en polea","Pull-through en polea (glúteo)",
+    "Cruce de poleas alto a bajo","Cruce de poleas bajo a alto","Press de pecho en polea de pie","Aperturas en polea (cable fly)",
+    "Jalón al pecho en polea (agarre ancho)","Jalón al pecho en polea (agarre cerrado)","Jalón tras nuca en polea","Remo sentado en polea (agarre estrecho)","Remo sentado en polea (agarre ancho)","Remo en polea a una mano","Pull-over en polea (cuerda o barra)","Face pull en polea",
+    "Elevación lateral en polea","Elevación frontal en polea","Press de hombro en polea","Remo al mentón en polea",
+    "Curl de bíceps en polea (barra recta)","Curl de bíceps en polea (cuerda)","Curl de bíceps en polea (barra Z)","Extensión de tríceps en polea (barra recta)","Extensión de tríceps en polea (cuerda)","Extensión de tríceps en polea a una mano","Press francés en polea",
+    "Crunch en polea (de rodillas, con cuerda)","Giro de torso en polea (wood chop)","Elevación de piernas en polea"
+  ],
+  "Peso corporal / Calistenia": [
+    "Dominadas (pull-up, agarre prono)","Dominadas supinas (chin-up)","Dominadas agarre neutro","Fondos en paralelas (dips de pecho)","Fondos en banco (bench dips)","Flexiones de pecho (push-ups)","Flexiones diamante","Flexiones declinadas","Flexiones inclinadas","Sentadilla con salto (jump squat)","Sentadilla búlgara sin peso","Sentadilla pistol (pistol squat)","Sentadilla sissy","Sentadilla asistida (tipo 'sentadilla perfecta', banda/TRX)","Zancadas sin peso","Plancha (plank)","Plancha lateral","Elevación de piernas colgado (hanging leg raise)","Rueda abdominal (ab wheel rollout)","Hip thrust sin peso","Puente de glúteo a una pierna"
+  ],
+  "Ejercicios en casa (barra + bandas de resistencia)": [
+    "Press de pecho con banda (anclada a la espalda)","Press militar con banda (pisando)","Elevaciones laterales con banda (pisando)","Elevaciones frontales con banda (pisando)","Face pull con banda","Remo sentado con banda (planta de los pies)","Jalón al pecho con banda (anclada arriba)","Curl de bíceps con banda (pisando)","Extensión de tríceps con banda (overhead, pisando)","Sentadilla con banda (pisando)","Peso muerto con banda (pisando)","Puente de glúteo con banda","Remo con banda (bisagra de cadera, pisando)","Remo unilateral con banda","Aperturas de pecho con banda","Encogimientos con banda (pisando)","Curl martillo con banda (pisando)","Patada de tríceps con banda (pisando)","Zancadas con banda (pisando)","Elevación de talones con banda","Abducción de cadera de pie con banda","Pull-through con banda","Giro de torso con banda (woodchop)","Pallof press con banda"
+  ]
+};
+
+// Videos específicos verificados para los ejercicios más comunes (en vez de una búsqueda genérica).
+// El resto de la biblioteca sigue usando un link de búsqueda hasta que se vayan agregando más.
+const SPECIFIC_VIDEO_LINKS = {
+  "Sentadilla trasera con barra (back squat)": "https://www.youtube.com/watch?v=8PMjqgR8Wa8",
+  "Sentadilla frontal con barra (front squat)": "https://www.youtube.com/watch?v=wyDbagKS7Rg",
+  "Sentadilla goblet": "https://www.youtube.com/watch?v=gCESNsDsbqk",
+  "Sentadilla búlgara con mancuernas": "https://www.youtube.com/watch?v=2C-uNgKwPLE",
+  "Peso muerto convencional": "https://www.youtube.com/watch?v=VL5Ab0T07e4",
+  "Peso muerto rumano con barra": "https://www.youtube.com/watch?v=JCXUYuzwNrM",
+  "Press de banca plano con barra": "https://www.youtube.com/watch?v=rT7DgCr-3pg",
+  "Press de hombro con mancuernas (sentado)": "https://www.youtube.com/watch?v=fuQpuu--bMI",
+  "Dominadas (pull-up, agarre prono)": "https://www.youtube.com/watch?v=vw5Xmu5CIew",
+  "Remo con barra (bent-over row)": "https://www.youtube.com/watch?v=9efgcAjQe7E",
+  "Jalón al pecho en polea (agarre ancho)": "https://www.youtube.com/watch?v=lueEJGjTuPQ",
+  "Curl de bíceps con barra recta": "https://www.youtube.com/watch?v=dDI8ClxRS04",
+  "Extensión de tríceps en polea (cuerda)": "https://www.youtube.com/watch?v=y6EdXBdL75A",
+  "Plancha (plank)": "https://www.youtube.com/watch?v=pSHjTRCQxIw",
+  "Hip thrust con barra": "https://www.youtube.com/watch?v=Zp26q4BY5HE",
+  "Prensa de piernas horizontal": "https://www.youtube.com/watch?v=XNvaNipSycI",
+  "Extensión de cuádriceps en máquina": "https://www.youtube.com/watch?v=tTbJBUKnWU8",
+  "Curl femoral en máquina acostado": "https://www.youtube.com/watch?v=0Dzmp8Yt7kM",
+  "Elevación de talones en máquina de pie": "https://www.youtube.com/watch?v=YMmgqO8Jo-k",
+  "Press de pecho inclinado con mancuernas": "https://www.youtube.com/watch?v=VDU5bzE2qOE",
+  "Aperturas planas con mancuernas (flyes)": "https://www.youtube.com/watch?v=eozdVDA78K0",
+  "Press militar con barra de pie": "https://www.youtube.com/watch?v=2yjwXTZQDDI",
+  "Elevaciones laterales con mancuernas": "https://www.youtube.com/watch?v=Y29xKcze8Ik",
+  "Remo sentado en polea (agarre estrecho)": "https://www.youtube.com/watch?v=XaHV_8Nbyug",
+  "Curl martillo con mancuernas": "https://www.youtube.com/watch?v=zC3nLlEvin4",
+  "Zancadas con mancuernas": "https://www.youtube.com/watch?v=I34ysEkPK7w",
+  "Sentadilla en Smith": "https://www.youtube.com/watch?v=AHnX-aimA4E",
+  "Press de banca inclinado con barra": "https://www.youtube.com/watch?v=11gY7Q5D5wo",
+  "Fondos en paralelas (dips de pecho)": "https://www.youtube.com/watch?v=T1L4smOP0L8",
+  "Face pull en polea": "https://www.youtube.com/watch?v=lvry5Be2RrQ",
+  "Sentadilla sumo con barra": "https://www.youtube.com/watch?v=XbXRGhLDtgc",
+  "Peso muerto sumo": "https://www.youtube.com/watch?v=XsrD5y8EIKU",
+  "Press de pecho en máquina (convergente)": "https://www.youtube.com/watch?v=zgP-UCKGe24",
+  "Remo en máquina (agarre neutro)": "https://www.youtube.com/watch?v=FAbWKi1PF4o",
+  "Curl de bíceps en polea (barra recta)": "https://www.youtube.com/watch?v=1W1w4ens3n0",
+  "Extensión de tríceps en polea (barra recta)": "https://www.youtube.com/watch?v=8JBHlaS7Dkk",
+  "Jalón al pecho en polea (agarre cerrado)": "https://www.youtube.com/watch?v=IjoFCmLX7z0",
+  "Cruce de poleas alto a bajo": "https://www.youtube.com/watch?v=Rwz69lvgJys",
+  "Abducción de cadera en máquina": "https://www.youtube.com/watch?v=h9BqUMqK-SY",
+  "Curl femoral en máquina sentado": "https://www.youtube.com/watch?v=ELOCsoDSmrg",
+  "Press de hombro en máquina": "https://www.youtube.com/watch?v=3R14MnZbcpw",
+  "Extensión de tríceps a dos manos (overhead)": "https://www.youtube.com/watch?v=zKkfGUYJMaA",
+  "Remo con mancuerna a una mano (unilateral)": "https://www.youtube.com/watch?v=pYcpY20QaE8",
+  "Peso muerto rígido (stiff-leg deadlift)": "https://www.youtube.com/watch?v=cO5omNU0wYI",
+  "Dominadas supinas (chin-up)": "https://www.youtube.com/watch?v=a29HExMHMyU",
+  "Press francés con barra (skull crusher)": "https://www.youtube.com/watch?v=7tRrsGTf-nA",
+  "Curl de bíceps con mancuernas (alterno)": "https://www.youtube.com/watch?v=sAq_ocpRh_I",
+  "Curl concentrado con mancuerna": "https://www.youtube.com/watch?v=MM3REno4u6U",
+  "Elevaciones frontales con mancuernas": "https://www.youtube.com/watch?v=-t7fuZ0KhDA",
+  "Press Arnold": "https://www.youtube.com/watch?v=6Z15_WdXmVw",
+  "Pullover con mancuerna": "https://www.youtube.com/watch?v=Ydpy886udzo",
+  "Encogimientos con mancuernas (shrugs)": "https://www.youtube.com/watch?v=cJRVVxmytaM",
+  "Encogimientos con barra (shrugs)": "https://www.youtube.com/watch?v=9xGqgGFAtiM",
+  "Zancadas con barra": "https://www.youtube.com/watch?v=I__9oV1UDv0",
+  "Peso muerto rumano con mancuernas": "https://www.youtube.com/watch?v=aa57T45iFSE",
+  "Flexiones de pecho (push-ups)": "https://www.youtube.com/watch?v=i9sTjhN4Z3M",
+  "Sentadilla pistol (pistol squat)": "https://www.youtube.com/watch?v=hHxm3VbuS-w",
+  "Elevación de piernas colgado (hanging leg raise)": "https://www.youtube.com/watch?v=Pr1ieGZ5atk",
+  "Rueda abdominal (ab wheel rollout)": "https://www.youtube.com/watch?v=NbudTqiwguk",
+  "Buenos días (good morning) con barra": "https://www.youtube.com/watch?v=VkNcc0BQrpA",
+  "Sentadilla búlgara con barra": "https://www.youtube.com/watch?v=-4LVK1crLSw",
+  "Zancadas caminando con mancuernas": "https://www.youtube.com/watch?v=qQyCK_rxzN0",
+  "Step-up con mancuernas": "https://www.youtube.com/watch?v=9ZknEYboBOQ",
+  "Peso muerto piernas rígidas con mancuernas": "https://www.youtube.com/watch?v=iXbGzZE84aI",
+  "Elevación de talones de pie con mancuernas": "https://www.youtube.com/watch?v=wxwY7GXxL4k",
+  "Press de pecho declinado con mancuernas": "https://www.youtube.com/watch?v=Pf1nDoqx_1A",
+  "Press de banca declinado con barra": "https://www.youtube.com/watch?v=LfyQBUKR8SE",
+  "Press de banca agarre cerrado": "https://www.youtube.com/watch?v=cXbSJHtjrQQ",
+  "Remo Pendlay": "https://www.youtube.com/watch?v=h4nkoayPFWw",
+  "Remo Yates (agarre supino)": "https://www.youtube.com/watch?v=SHED5899rnY",
+  "Press tras nuca con barra": "https://www.youtube.com/watch?v=zhFoDNzSTyE",
+  "Remo al mentón con barra (upright row)": "https://www.youtube.com/watch?v=nIJGvsdNtFE",
+  "Curl de bíceps con barra Z": "https://www.youtube.com/watch?v=zG2xJ0Q5QtI",
+  "Curl 21s con barra": "https://www.youtube.com/watch?v=8YzaAwkjrM4",
+  "Press militar sentado con barra": "https://www.youtube.com/watch?v=uiYOYMDiA44",
+  "Prensa de piernas 45°": "https://www.youtube.com/watch?v=Oxy31rMrTeo",
+  "Sentadilla Hack (hack squat)": "https://www.youtube.com/watch?v=0tn5K9NlCfo",
+  "Hip thrust en máquina": "https://www.youtube.com/watch?v=UVucPKyQVLU",
+  "Pec deck / Contractora de pecho": "https://www.youtube.com/watch?v=Dbly77Jgbo8",
+  "Press declinado en máquina": "https://www.youtube.com/watch?v=_DsWm45BCqg",
+  "Remo T en máquina (T-bar row)": "https://www.youtube.com/watch?v=rvbjGSQ2tVE",
+  "Hiperextensión en banco romano": "https://www.youtube.com/watch?v=Oqiy9nTE2v0",
+  "Máquina de jalón asistido para dominadas": "https://www.youtube.com/watch?v=wFj808u2HWU",
+  "Elevación lateral en máquina": "https://www.youtube.com/watch?v=IropE3iOk2c",
+  "Máquina de deltoide posterior (reverse pec deck)": "https://www.youtube.com/watch?v=R63UajjKfnM",
+  "Curl de bíceps en máquina": "https://www.youtube.com/watch?v=nLsoV9rdFhY",
+  "Curl Scott / predicador en máquina": "https://www.youtube.com/watch?v=_2caXWsxlNk",
+  "Extensión de tríceps en máquina": "https://www.youtube.com/watch?v=1N3ULjM7-Jw",
+  "Fondos en máquina (dip asistido)": "https://www.youtube.com/watch?v=y00_rMYk1Oc",
+  "Máquina de abdominales (crunch)": "https://www.youtube.com/watch?v=NpjB_rp756Y",
+  "Aperturas en polea (cable fly)": "https://www.youtube.com/watch?v=ovFc-5YdcXw",
+  "Remo sentado en polea (agarre ancho)": "https://www.youtube.com/watch?v=PDg18XVLMe0",
+  "Remo en polea a una mano": "https://www.youtube.com/watch?v=raO8Q08Wems",
+  "Curl de bíceps en polea (cuerda)": "https://www.youtube.com/watch?v=Qt-NixlIVGM",
+  "Extensión de tríceps en polea a una mano": "https://www.youtube.com/watch?v=juNUDw4hVHU",
+  "Press de hombro en polea": "https://www.youtube.com/watch?v=I5yuNa5DSk0",
+  "Elevación de piernas en polea": "https://www.youtube.com/watch?v=b8oUb_6POhQ",
+  "Sentadilla caja (box squat)": "https://www.youtube.com/watch?v=WGjf5w8iaTM",
+  "Pullover con barra": "https://www.youtube.com/watch?v=3QiBnN2r51I",
+  "Press cerrado con barra (close grip bench)": "https://www.youtube.com/watch?v=a2G3IdaTcPU",
+  "Aperturas inclinadas con mancuernas": "https://www.youtube.com/watch?v=8nrLh4GpS7w",
+  "Curl inclinado con mancuernas (incline curl)": "https://www.youtube.com/watch?v=1gCfaEWk_Ds",
+  "Patada de tríceps con mancuerna (kickback)": "https://www.youtube.com/watch?v=m9me06UBPKc",
+  "Russian twist con mancuerna": "https://www.youtube.com/watch?v=TfTUk2AjV7g",
+  "Flexiones diamante": "https://www.youtube.com/watch?v=J0DnG1_S92I",
+  "Prensa de piernas vertical": "https://www.youtube.com/watch?v=q6JKeVRfBhM",
+  "Press de pecho en máquina (placas)": "https://www.youtube.com/watch?v=fPZ56mbtpOA",
+  "Remo en máquina (placas, horizontal)": "https://www.youtube.com/watch?v=Xnqc7wcYhb0",
+  "Pull-over en máquina": "https://www.youtube.com/watch?v=ZOwR5Ar81rg",
+  "Press francés en máquina": "https://www.youtube.com/watch?v=7AnmjGVbbJE",
+  "Sentadilla zercher": "https://www.youtube.com/watch?v=vpy4ADmlo1E",
+  "Peso muerto déficit": "https://www.youtube.com/watch?v=m7Q8igdp3lA",
+  "Cargada de potencia (power clean)": "https://www.youtube.com/watch?v=KjGvwQl8tis",
+  "Push press con barra": "https://www.youtube.com/watch?v=sIOlizzBMaY",
+  "Thruster con barra": "https://www.youtube.com/watch?v=Zvt5-mugUco",
+  "Sentadilla sumo con mancuerna": "https://www.youtube.com/watch?v=flvsWPyA8pw",
+  "Remo renegado (renegade row)": "https://www.youtube.com/watch?v=wTqlJ0aoJlM",
+  "Vuelos posteriores con mancuernas (rear delt fly)": "https://www.youtube.com/watch?v=dA4iqyTgx5I",
+  "Fondos en banco (bench dips)": "https://www.youtube.com/watch?v=0326dy_-CzM",
+  "Sentadilla con salto (jump squat)": "https://www.youtube.com/watch?v=BRfxI2Es2lE",
+  "Sentadilla con barra libre (high bar)": "https://www.youtube.com/watch?v=jb6AyMlVDuI",
+  "Sentadilla con barra libre (low bar)": "https://www.youtube.com/watch?v=Po9CDtfcLJI",
+  "Puente de glúteo con barra": "https://www.youtube.com/watch?v=ylpfCk3i-0Y",
+  "Dominadas lastradas con barra/cinturón": "https://www.youtube.com/watch?v=oPigwqlUng0",
+  "Hip thrust unilateral con mancuerna": "https://www.youtube.com/watch?v=5qnzUDDwm6c",
+  "Press Cubano (Cuban press)": "https://www.youtube.com/watch?v=e7gGRU0o-Q8",
+  "Peso muerto rumano en polea": "https://www.youtube.com/watch?v=kMdsruYbF9k",
+  "Pull-through en polea (glúteo)": "https://www.youtube.com/watch?v=OkcryKUZTZs",
+  "Elevación frontal en polea": "https://www.youtube.com/watch?v=wxzEul89zR0",
+  "Remo al mentón en polea": "https://www.youtube.com/watch?v=8S7P6OrT9TA",
+  "Press francés en polea": "https://www.youtube.com/watch?v=SLYwsE_W1eM",
+  "Giro de torso en polea (wood chop)": "https://www.youtube.com/watch?v=yPvAj_X_5NM",
+  "Dominadas agarre neutro": "https://www.youtube.com/watch?v=Zr8hHd2Q2Eo",
+  "Flexiones inclinadas": "https://www.youtube.com/watch?v=0JUrOH--Kdk",
+  "Sentadilla sissy": "https://www.youtube.com/watch?v=VUiFlZ2FsKA",
+  "Plancha lateral": "https://www.youtube.com/watch?v=pitOuJxdyI0",
+  "Sentadilla búlgara en máquina Smith": "https://www.youtube.com/watch?v=HcQLdQQ-xTM",
+  "Elevación de talones en máquina sentado": "https://www.youtube.com/watch?v=JbyjNymZOt0",
+  "Elevación de talones en prensa de piernas": "https://www.youtube.com/watch?v=XdtWVYFVhGU",
+  "Máquina de glúteo (glute drive)": "https://www.youtube.com/watch?v=D-2CRYjRees",
+  "Patada de glúteo en máquina (glute kickback)": "https://www.youtube.com/watch?v=WhtxQnm4254",
+  "Press de banca en máquina Smith (plano)": "https://www.youtube.com/watch?v=z_r6hDOYtO0",
+  "Peso muerto en máquina Smith": "https://www.youtube.com/watch?v=rtYH-SKh0to",
+  "Press de hombro en máquina Smith": "https://www.youtube.com/watch?v=OLqZDUUD2b0",
+  "Encogimientos (shrugs) en máquina Smith": "https://www.youtube.com/watch?v=cT5_GyOXIgE",
+  "Máquina de giro de torso": "https://www.youtube.com/watch?v=97boSjZ0erk",
+  "Elevación de piernas en máquina con soporte": "https://www.youtube.com/watch?v=o7NVjPmA3sg",
+  "Press Svend": "https://www.youtube.com/watch?v=cIoUZOnypS8",
+  "Cruce de poleas bajo a alto": "https://www.youtube.com/watch?v=KFl3Re5UbPo",
+  "Press de pecho en polea de pie": "https://www.youtube.com/watch?v=H1xkzPbvqDU",
+  "Jalón tras nuca en polea": "https://www.youtube.com/watch?v=RXMe40v6kso",
+  "Crunch en polea (de rodillas, con cuerda)": "https://www.youtube.com/watch?v=kc0PRn372lo",
+  "Sentadilla en máquina Smith": "https://www.youtube.com/watch?v=vlEWja5L-g8",
+  "Zancada en máquina Smith": "https://www.youtube.com/watch?v=KlSn8ABffAI",
+  "Curl femoral en máquina de pie (unilateral)": "https://www.youtube.com/watch?v=CZVTv9T_Ml8",
+  "Aducción de cadera en máquina": "https://www.youtube.com/watch?v=CjAVezAggkI",
+  "Press inclinado en máquina": "https://www.youtube.com/watch?v=7_scLkTCwTU",
+  "Press de banca en máquina Smith (inclinado)": "https://www.youtube.com/watch?v=b8DqTO6ak0k",
+  "Press de banca en máquina Smith (declinado)": "https://www.youtube.com/watch?v=HTcaVHIOags",
+  "Jalón al pecho en máquina (agarre ancho)": "https://www.youtube.com/watch?v=K1i6m5RJDlA",
+  "Jalón al pecho en máquina (agarre cerrado)": "https://www.youtube.com/watch?v=mUoo2l-p8Hw",
+  "Zancadas caminando con barra": "https://www.youtube.com/watch?v=X9QswJmhBQI",
+  "Press guillotina (al cuello)": "https://www.youtube.com/watch?v=AkZTD7vcfOw",
+  "Arrancada (snatch)": "https://www.youtube.com/watch?v=mNn0HhOTguI",
+  "Press de pecho plano con mancuernas": "https://www.youtube.com/watch?v=YQ2s_Y7g5Qk",
+  "Remo Kroc": "https://www.youtube.com/watch?v=lL6fOrEPvQI",
+  "Press francés con mancuernas": "https://www.youtube.com/watch?v=ItLKDvhO8RU",
+  "Side bend con mancuerna": "https://www.youtube.com/watch?v=dL9ZzqtQI5c",
+  "Patada de glúteo en polea (cable kickback)": "https://www.youtube.com/watch?v=VSgMyiOu0uE",
+  "Abducción de cadera en polea": "https://www.youtube.com/watch?v=pvnR8CDb4BU",
+  "Pull-over en polea (cuerda o barra)": "https://www.youtube.com/watch?v=Xyz4vp63qCk",
+  "Elevación lateral en polea": "https://www.youtube.com/watch?v=zzB2gzOh5i4",
+  "Curl de bíceps en polea (barra Z)": "https://www.youtube.com/watch?v=2f3uLBv0lfs",
+  "Flexiones declinadas": "https://www.youtube.com/watch?v=SKPab2YC8BE",
+  "Sentadilla búlgara sin peso": "https://www.youtube.com/watch?v=48Zg7td3MqQ",
+  "Sentadilla asistida (tipo 'sentadilla perfecta', banda/TRX)": "https://www.youtube.com/watch?v=NM-Mqg4fZ3o",
+  "Zancadas sin peso": "https://www.youtube.com/watch?v=-_270H-3Wrc",
+  "Hip thrust sin peso": "https://www.youtube.com/watch?v=RR0oZhhUVWo",
+  "Puente de glúteo a una pierna": "https://www.youtube.com/watch?v=_K_di6h2-Wg",
+  "Press de pecho con banda (anclada a la espalda)": "https://www.youtube.com/watch?v=oQpnL60ptmU",
+  "Press militar con banda (pisando)": "https://www.youtube.com/watch?v=xSCCtUsSfHI",
+  "Elevaciones laterales con banda (pisando)": "https://www.youtube.com/watch?v=yfNg5sFndbw",
+  "Elevaciones frontales con banda (pisando)": "https://www.youtube.com/watch?v=1lO0JTw9yNk",
+  "Face pull con banda": "https://www.youtube.com/watch?v=81AGJttw2qc",
+  "Remo sentado con banda (planta de los pies)": "https://www.youtube.com/watch?v=TBNt2DBvkl4",
+  "Jalón al pecho con banda (anclada arriba)": "https://www.youtube.com/watch?v=o5bXFrdw5iI",
+  "Curl de bíceps con banda (pisando)": "https://www.youtube.com/watch?v=PXLF19Oqe3M",
+  "Extensión de tríceps con banda (overhead, pisando)": "https://www.youtube.com/watch?v=a5rUdCeTtSE",
+  "Sentadilla con banda (pisando)": "https://www.youtube.com/watch?v=duP-UZsfOaQ",
+  "Peso muerto con banda (pisando)": "https://www.youtube.com/watch?v=ty7ssmRxRRw",
+  "Puente de glúteo con banda": "https://www.youtube.com/watch?v=gOOo1nmydeA",
+  "Remo con banda (bisagra de cadera, pisando)": "https://www.youtube.com/watch?v=Y3H17rshgZE",
+  "Remo unilateral con banda": "https://www.youtube.com/watch?v=qUIBmTsLplo",
+  "Aperturas de pecho con banda": "https://www.youtube.com/watch?v=UpyX0O740Gg",
+  "Encogimientos con banda (pisando)": "https://www.youtube.com/watch?v=NHU7x7d7Hac",
+  "Curl martillo con banda (pisando)": "https://www.youtube.com/watch?v=l6OlwHmll3w",
+  "Patada de tríceps con banda (pisando)": "https://www.youtube.com/watch?v=4pm3-DEzJWY",
+  "Zancadas con banda (pisando)": "https://www.youtube.com/watch?v=fyMtTB2oYTs",
+  "Elevación de talones con banda": "https://www.youtube.com/watch?v=a2xjbhP4MkY",
+  "Abducción de cadera de pie con banda": "https://www.youtube.com/watch?v=v-tN9LG547I",
+  "Pull-through con banda": "https://www.youtube.com/watch?v=NO-NevrDrjE",
+  "Giro de torso con banda (woodchop)": "https://www.youtube.com/watch?v=hXwBHRANfXU",
+  "Pallof press con banda": "https://www.youtube.com/watch?v=5_8d8vHgZvU"
+};
+
+function libraryVideoUrl(exerciseName){
+  if(SPECIFIC_VIDEO_LINKS[exerciseName]) return SPECIFIC_VIDEO_LINKS[exerciseName];
+  return `https://www.youtube.com/results?search_query=${encodeURIComponent(exerciseName + ' técnica ejecución correcta')}`;
+}
+
+// --- Entrevista inicial: preguntas que ajustan la capacidad de recuperación ---
+const INTAKE_QUESTIONS = [
+  { key:'sueno', label:'¿Cuántas horas duermes en promedio por noche?', options:[
+      {label:'Menos de 5 horas', value:-2},
+      {label:'5 a 6 horas', value:-1},
+      {label:'7 a 8 horas', value:0},
+      {label:'Más de 8 horas', value:1}
+    ]},
+  { key:'alimentacion', label:'¿Cómo describirías tu alimentación actual?', options:[
+      {label:'Déficit calórico marcado (dieta estricta)', value:-2},
+      {label:'Déficit calórico leve', value:-1},
+      {label:'Mantenimiento / sin dieta estructurada', value:0},
+      {label:'Superávit calórico (buscando ganar peso o masa)', value:1}
+    ]},
+  { key:'trabajo', label:'¿Cómo es tu actividad diaria fuera del gimnasio?', options:[
+      {label:'Sedentaria (oficina, poco movimiento)', value:0},
+      {label:'Moderadamente activa (de pie, caminar seguido)', value:-1},
+      {label:'Físicamente demandante (esfuerzo manual, cargar peso)', value:-2}
+    ]},
+  { key:'estres', label:'¿Cómo calificarías tu nivel de estrés diario?', options:[
+      {label:'Bajo', value:0},
+      {label:'Moderado', value:-1},
+      {label:'Alto', value:-2}
+    ]},
+  { key:'experiencia', label:'¿Cuál es tu experiencia entrenando con pesas?', options:[
+      {label:'Principiante (menos de 6 meses)', value:-2},
+      {label:'Intermedio (6 meses a 2 años)', value:0},
+      {label:'Avanzado (más de 2 años constante)', value:1}
+    ]},
+  { key:'edad', label:'¿En qué rango de edad te encuentras?', options:[
+      {label:'Menos de 30 años', value:0},
+      {label:'30 a 45 años', value:-1},
+      {label:'Más de 45 años', value:-2}
+    ]}
+];
+
+// --- Landmarks base (series/semana) — puntos de referencia orientativos, no absolutos ---
+const BASE_LANDMARKS = [
+  { muscle:'Pecho', mev:8, mav:16, mrv:22 },
+  { muscle:'Espalda', mev:10, mav:18, mrv:25 },
+  { muscle:'Hombro (deltoides)', mev:6, mav:18, mrv:26 },
+  { muscle:'Cuádriceps', mev:8, mav:14, mrv:20 },
+  { muscle:'Isquiotibiales', mev:6, mav:12, mrv:20 },
+  { muscle:'Glúteo', mev:4, mav:10, mrv:16 },
+  { muscle:'Bíceps', mev:6, mav:16, mrv:26 },
+  { muscle:'Tríceps', mev:6, mav:12, mrv:18 },
+  { muscle:'Pantorrilla', mev:8, mav:14, mrv:20 },
+  { muscle:'Abdomen', mev:6, mav:18, mrv:25 }
+];
+
+let currentMode = null;
+let currentClientName = null;
+let currentViewedRoutine = DEFAULT_ROUTINE;
+let currentViewedProfile = DEFAULT_PROFILE;
+let editingRoutineTemplate = null;
+
+// --- Render de la rutina (dinámico, según cliente) ---
+function parseSeriesCount(seriesStr){
+  const nums = String(seriesStr || '').match(/\d+/g);
+  if(!nums) return 3;
+  const n = Math.max(...nums.map(Number));
+  return Math.min(Math.max(n, 1), 6);
+}
+
+function renderRoutine(routine){
+  const container = document.getElementById('day-container');
+  let html = '';
+  (routine.days || []).forEach((day, di) => {
+    const dayNum = di + 1;
+    const hasExercises = (day.exercises || []).length > 0;
+    const rowsHtml = (day.exercises || []).map((ex, ei) => {
+      const uid = `d${dayNum}e${ei+1}`;
+      const videoLink = ex.video ? `<a class="video-link" href="${escapeHtml(ex.video)}" target="_blank" rel="noopener">▶ Ver demostración</a>` : '';
+      const setCount = parseSeriesCount(ex.series);
+      const setInputs = Array.from({length: setCount}, (_, si) =>
+        `<input class="log-input set-input" type="text" inputmode="numeric" placeholder="S${si+1}" id="${uid}-set${si+1}" onchange="saveLog('${uid}-set${si+1}', this.value)">`
+      ).join('');
+      return `<tr><td><span class="ex-name">${escapeHtml(ex.name)}</span>${ex.note ? `<span class="ex-note">${escapeHtml(ex.note)}</span>` : ''}${videoLink}</td><td>${escapeHtml(ex.series)}</td><td>${escapeHtml(ex.reps)}</td><td>${escapeHtml(ex.rest)}</td><td><input class="log-input" type="number" inputmode="decimal" placeholder="kg" id="${uid}-peso" onchange="saveLog('${uid}-peso', this.value)"></td><td><div class="set-inputs">${setInputs}</div></td><td><input class="log-input" type="number" inputmode="numeric" min="1" max="10" placeholder="1-10" id="${uid}-rpe" onchange="saveLog('${uid}-rpe', this.value)"></td></tr>`;
+    }).join('');
+    const tableOrEmpty = hasExercises
+      ? `<div class="table-scroll"><table class="exercise-table">
+          <tr><th>Ejercicio</th><th>Series</th><th>Reps obj.</th><th>Descanso</th><th>Peso (kg)</th><th>Reps por serie</th><th>RPE</th></tr>
+          ${rowsHtml}
+        </table></div>`
+      : `<div style="padding:14px 16px;font-size:0.82rem;color:var(--acero);">Este día no tiene ejercicios asignados para este cliente.</div>`;
+    html += `<div class="card" style="border-left:none;padding:0;">
+      <button class="day-toggle" onclick="toggleDay(this)"><span>${escapeHtml(day.title)}</span><span class="arrow">▾</span></button>
+      <div class="day-body">
+        <div class="day-sub">${escapeHtml(day.warmup || '')}</div>
+        ${tableOrEmpty}
+        <div class="day-footer-log">
+          <div><label style="font-size:0.72rem;color:var(--acero);">Fecha de la sesión:&nbsp;</label><input type="date" class="fecha-input" id="d${dayNum}-fecha" onchange="saveLog('d${dayNum}-fecha', this.value)"></div>
+          <span class="saved-flash" id="d${dayNum}-flash">Guardado ✓</span>
+          <button class="save-session-btn" onclick="saveSessionToHistory(${dayNum})">💾 Guardar sesión en historial</button>
+          <button class="clear-btn" onclick="clearDay(${dayNum})">Borrar registro del día</button>
+        </div>
+        <div class="rpe-note">${escapeHtml(day.rpeNote || '')}</div>
+      </div>
+    </div>`;
+  });
+  container.innerHTML = html;
+  const first = container.querySelector('.day-toggle');
+  if(first) toggleDay(first);
+}
+
+// --- Render del perfil/objetivo (en blanco hasta que el entrenador lo defina) ---
+const PROFILE_FIELDS = [
+  {key:'objetivo', label:'Objetivo'},
+  {key:'enfoque', label:'Enfoque'},
+  {key:'frecuencia', label:'Frecuencia'},
+  {key:'estructura', label:'Estructura'},
+  {key:'rangoReps', label:'Rango reps'},
+  {key:'rpe', label:'Esfuerzo (RPE)'}
+];
+function renderProfile(profile){
+  const container = document.getElementById('profile-container');
+  container.innerHTML = PROFILE_FIELDS.map(f => {
+    const val = (profile && profile[f.key]) ? profile[f.key] : '—';
+    return `<div class="info-item"><div class="label">${escapeHtml(f.label)}</div><div class="value">${escapeHtml(val)}</div></div>`;
+  }).join('');
+}
+
+// --- Entrevista inicial: render de preguntas, cálculo y tabla de landmarks ---
+function renderIntakeQuestions(){
+  const container = document.getElementById('intake-questions');
+  container.innerHTML = INTAKE_QUESTIONS.map(q => `
+    <div class="intake-q">
+      <label>${escapeHtml(q.label)}</label>
+      <select id="intake-${q.key}" data-key="${q.key}" onchange="onIntakeChange()">
+        <option value="">-- Selecciona --</option>
+        ${q.options.map(o => `<option value="${o.value}">${escapeHtml(o.label)}</option>`).join('')}
+      </select>
+    </div>
+  `).join('');
+}
+
+function computeAdjustedLandmarks(score){
+  const multiplier = Math.max(0.70, Math.min(1.15, 1 + (score * 0.025)));
+  const rows = BASE_LANDMARKS.map(row => {
+    let mev = Math.round(row.mev * multiplier);
+    let mav = Math.round(row.mav * multiplier);
+    let mrv = Math.round(row.mrv * multiplier);
+    if(mav < mev) mav = mev;
+    if(mrv < mav) mrv = mav;
+    return { muscle: row.muscle, mev, mav, mrv };
+  });
+  return { multiplier, rows };
+}
+
+function renderIntakeResults(data){
+  const summaryEl = document.getElementById('intake-summary-container');
+  const tableEl = document.getElementById('landmark-table-container');
+  if(!data){
+    summaryEl.innerHTML = '';
+    tableEl.innerHTML = `<div class="history-empty">Completa la entrevista para calcular el volumen de entrenamiento sugerido.</div>`;
+    return;
+  }
+  const pct = Math.round((data.multiplier - 1) * 100);
+  const pctText = pct === 0 ? 'estándar (sin ajuste)' : (pct > 0 ? `+${pct}% sobre el estándar` : `${pct}% bajo el estándar`);
+  summaryEl.innerHTML = `<div class="intake-summary">Capacidad de recuperación estimada: <strong>${pctText}</strong>. Estos números son un punto de partida orientativo — ajústalos según cómo responda el cliente en las primeras semanas.</div>`;
+  tableEl.innerHTML = `<div class="table-scroll"><table class="landmark-table">
+    <tr><th>Músculo</th><th>MEV</th><th>MAV</th><th>MRV</th></tr>
+    ${data.rows.map(r => `<tr><td>${escapeHtml(r.muscle)}</td><td>${r.mev}</td><td>${r.mav}</td><td>${r.mrv}</td></tr>`).join('')}
+  </table></div>
+  <div style="font-size:0.68rem;color:var(--acero);margin-top:8px;">Series por semana, por grupo muscular. MEV = volumen mínimo efectivo · MAV = volumen adaptativo máximo · MRV = volumen máximo recuperable.</div>`;
+}
+
+function getActiveClientName(){
+  if(currentMode === 'cliente') return currentClientName;
+  if(currentMode === 'entrenador') return document.getElementById('cliente-selector')?.value || null;
+  return null;
+}
+
+// ---------- NOTAS (entrenador y cliente) ----------
+async function loadNotesFor(name){
+  const trainerEl = document.getElementById('trainer-notes');
+  const clientEl = document.getElementById('client-notes');
+  if(!trainerEl || !clientEl) return;
+  if(!name){
+    trainerEl.value = '';
+    clientEl.value = '';
+    applyNotesReadonly();
+    return;
+  }
+  const raw = await sharedGet(`notes:${name}`);
+  let notes = { trainerNotes:'', clientNotes:'' };
+  if(raw){ try{ notes = JSON.parse(raw); }catch(e){} }
+  trainerEl.value = notes.trainerNotes || '';
+  clientEl.value = notes.clientNotes || '';
+  applyNotesReadonly();
+}
+
+function applyNotesReadonly(){
+  const trainerEl = document.getElementById('trainer-notes');
+  const clientEl = document.getElementById('client-notes');
+  if(!trainerEl || !clientEl) return;
+  // El entrenador solo edita sus propias notas; el cliente solo edita las suyas.
+  trainerEl.readOnly = (currentMode !== 'entrenador');
+  clientEl.readOnly = (currentMode !== 'cliente');
+  trainerEl.classList.toggle('readonly-input', trainerEl.readOnly);
+  clientEl.classList.toggle('readonly-input', clientEl.readOnly);
+}
+
+async function saveNotes(){
+  const name = getActiveClientName();
+  if(!name){
+    alert('Primero registra o selecciona un nombre de cliente.');
+    return;
+  }
+  const notes = {
+    trainerNotes: document.getElementById('trainer-notes').value,
+    clientNotes: document.getElementById('client-notes').value
+  };
+  await sharedSet(`notes:${name}`, JSON.stringify(notes));
+}
+
+// ---------- RECORDATORIOS ----------
+let currentReminders = [];
+
+async function loadRemindersFor(name){
+  if(!name){
+    currentReminders = [];
+    renderRemindersList();
+    return;
+  }
+  const raw = await sharedGet(`reminders:${name}`);
+  try{ currentReminders = raw ? JSON.parse(raw) : []; }catch(e){ currentReminders = []; }
+  renderRemindersList();
+}
+
+async function addReminder(){
+  const name = getActiveClientName();
+  if(!name){
+    alert('Primero registra o selecciona un nombre de cliente.');
+    return;
+  }
+  const textEl = document.getElementById('reminder-text-input');
+  const dateEl = document.getElementById('reminder-date-input');
+  const text = textEl.value.trim();
+  if(!text){ alert('Escribe el recordatorio.'); return; }
+  const reminder = {
+    id: 'r' + Date.now(),
+    text,
+    date: dateEl.value || '',
+    done: false,
+    createdBy: currentMode === 'entrenador' ? 'Entrenador' : 'Cliente'
+  };
+  currentReminders.push(reminder);
+  await sharedSet(`reminders:${name}`, JSON.stringify(currentReminders));
+  textEl.value = '';
+  dateEl.value = '';
+  renderRemindersList();
+}
+
+async function toggleReminder(id){
+  const name = getActiveClientName();
+  if(!name) return;
+  const r = currentReminders.find(x => x.id === id);
+  if(r) r.done = !r.done;
+  await sharedSet(`reminders:${name}`, JSON.stringify(currentReminders));
+  renderRemindersList();
+}
+
+async function deleteReminder(id){
+  const name = getActiveClientName();
+  if(!name) return;
+  currentReminders = currentReminders.filter(x => x.id !== id);
+  await sharedSet(`reminders:${name}`, JSON.stringify(currentReminders));
+  renderRemindersList();
+}
+
+function renderRemindersList(){
+  const listEl = document.getElementById('reminders-list');
+  if(!listEl) return;
+  if(!currentReminders.length){
+    listEl.innerHTML = `<div class="history-empty">No hay recordatorios todavía.</div>`;
+    return;
+  }
+  const sorted = currentReminders.slice().sort((a, b) => {
+    if(a.done !== b.done) return a.done ? 1 : -1;
+    return (a.date || '').localeCompare(b.date || '');
+  });
+  listEl.innerHTML = sorted.map(r => `
+    <div class="reminder-item ${r.done ? 'done' : ''}">
+      <input type="checkbox" ${r.done ? 'checked' : ''} onchange="toggleReminder('${r.id}')">
+      <div class="reminder-text">
+        ${escapeHtml(r.text)}
+        <span class="reminder-meta">${r.date ? escapeHtml(r.date) + ' · ' : ''}${escapeHtml(r.createdBy || '')}</span>
+      </div>
+      <button class="reminder-del" onclick="deleteReminder('${r.id}')">✕</button>
+    </div>
+  `).join('');
+}
+
+async function onIntakeChange(){
+  const name = getActiveClientName();
+  if(!name){
+    alert('Primero registra o selecciona un nombre de cliente antes de llenar la entrevista.');
+    return;
+  }
+  const answers = {};
+  let allAnswered = true;
+  let score = 0;
+  INTAKE_QUESTIONS.forEach(q => {
+    const el = document.getElementById(`intake-${q.key}`);
+    const val = el ? el.value : '';
+    if(val === ''){ allAnswered = false; }
+    else { score += Number(val); answers[q.key] = val; }
+  });
+
+  if(!allAnswered){
+    renderIntakeResults(null);
+    await sharedSet(`intake:${name}`, JSON.stringify({ answers, complete:false }));
+    return;
+  }
+
+  const { multiplier, rows } = computeAdjustedLandmarks(score);
+  const data = { answers, score, multiplier, rows, complete:true };
+  await sharedSet(`intake:${name}`, JSON.stringify(data));
+  renderIntakeResults(data);
+}
+
+async function loadIntakeFor(name){
+  renderIntakeQuestions();
+  if(!name){
+    renderIntakeResults(null);
+    return;
+  }
+  const raw = await sharedGet(`intake:${name}`);
+  if(!raw){ renderIntakeResults(null); return; }
+  let data;
+  try{ data = JSON.parse(raw); }catch(e){ renderIntakeResults(null); return; }
+  if(data.answers){
+    Object.keys(data.answers).forEach(key => {
+      const el = document.getElementById(`intake-${key}`);
+      if(el) el.value = data.answers[key];
+    });
+  }
+  renderIntakeResults(data.complete ? data : null);
+}
+
+function collectAllFieldValues(){
+  const result = {};
+  document.querySelectorAll('.log-input, .fecha-input').forEach(el => { if(el.id) result[el.id] = el.value; });
+  return result;
+}
+function applyFieldValues(data){
+  Object.keys(data).forEach(id => { const el = document.getElementById(id); if(el) el.value = data[id]; });
+}
+function clearAllInputs(){
+  document.querySelectorAll('.log-input, .fecha-input').forEach(el => el.value = '');
+}
+function setInputsReadonly(readonly){
+  document.querySelectorAll('.log-input, .fecha-input').forEach(el => {
+    el.readOnly = readonly;
+    el.classList.toggle('readonly-input', readonly);
+  });
+  document.querySelectorAll('.save-session-btn').forEach(btn => {
+    btn.style.display = readonly ? 'none' : 'inline-block';
+  });
+}
+function flashSaved(dayId){
+  const flash = document.getElementById(`d${dayId}-flash`);
+  if(!flash) return;
+  flash.classList.add('show');
+  clearTimeout(flash._timeout);
+  flash._timeout = setTimeout(() => flash.classList.remove('show'), 1500);
+}
+function flashForId(id){
+  const dayMatch = id.match(/^d(\d+)/);
+  if(dayMatch){
+    flashSaved(dayMatch[1]);
+    const body = document.querySelectorAll('.day-body')[dayMatch[1]-1];
+    if(body && body.style.maxHeight){ body.style.maxHeight = body.scrollHeight + "px"; }
+  }
+}
+
+function updateModeButtons(){
+  document.getElementById('btn-mode-cliente').classList.toggle('active', currentMode === 'cliente');
+  document.getElementById('btn-mode-entrenador').classList.toggle('active', currentMode === 'entrenador');
+  document.getElementById('cliente-panel').style.display = currentMode === 'cliente' ? 'block' : 'none';
+  document.getElementById('entrenador-panel').style.display = currentMode === 'entrenador' ? 'block' : 'none';
+}
+
+async function setMode(mode){
+  currentMode = mode;
+  await localSet('app-mode', mode);
+  updateModeButtons();
+  if(mode === 'cliente'){ await enterClienteMode(); } else { await enterEntrenadorMode(); }
+}
+
+// ---------- MODO CLIENTA ----------
+async function enterClienteMode(){
+  currentClientName = await localGet('client-name');
+  if(currentClientName){
+    document.getElementById('cliente-nombre-input').value = currentClientName;
+    await loadOwnRoutineAndLog();
+  } else {
+    renderRoutine(DEFAULT_ROUTINE);
+    currentViewedRoutine = DEFAULT_ROUTINE;
+    setInputsReadonly(true);
+    await loadIntakeFor(null);
+    await loadNotesFor(null);
+    await loadRemindersFor(null);
+    document.getElementById('cliente-status').textContent = 'Escribe tu nombre para empezar a guardar tu registro.';
+  }
+}
+
+async function setClientName(){
+  const val = document.getElementById('cliente-nombre-input').value.trim();
+  if(!val) return;
+  currentClientName = val;
+  await localSet('client-name', val);
+  await addToClientList(val);
+  await loadOwnRoutineAndLog();
+}
+
+async function addToClientList(name){
+  const raw = await sharedGet('clients-list');
+  let list = [];
+  try{ list = raw ? JSON.parse(raw) : []; }catch(e){ list = []; }
+  if(!list.includes(name)){
+    list.push(name);
+    await sharedSet('clients-list', JSON.stringify(list));
+  }
+}
+
+async function loadOwnRoutineAndLog(){
+  if(!currentClientName) return;
+  const rawProfile = await sharedGet(`profile:${currentClientName}`);
+  let profile = DEFAULT_PROFILE;
+  if(rawProfile){ try{ profile = JSON.parse(rawProfile); }catch(e){} }
+  currentViewedProfile = profile;
+  renderProfile(profile);
+
+  const rawRoutine = await sharedGet(`routine:${currentClientName}`);
+  let routine = DEFAULT_ROUTINE;
+  let hasCustom = false;
+  if(rawRoutine){ try{ routine = JSON.parse(rawRoutine); hasCustom = true; }catch(e){} }
+  currentViewedRoutine = routine;
+  renderRoutine(routine);
+  setInputsReadonly(false);
+  const rawLog = await sharedGet(`client-log:${currentClientName}`);
+  if(rawLog){ try{ applyFieldValues(JSON.parse(rawLog)); }catch(e){} }
+  await loadHistoryFor(currentClientName);
+  await loadIntakeFor(currentClientName);
+  await loadNotesFor(currentClientName);
+  await loadRemindersFor(currentClientName);
+  document.getElementById('cliente-status').textContent = hasCustom
+    ? `Registrando como: ${currentClientName} (rutina personalizada)`
+    : `Registrando como: ${currentClientName} (aún sin rutina personalizada — mostrando la rutina general)`;
+}
+
+async function saveLog(id, value){
+  flashForId(id);
+  if(currentMode === 'entrenador') return;
+  if(!currentClientName){
+    alert('Primero escribe y guarda tu nombre arriba (en la barra negra) para que tu avance quede registrado.');
+    return;
+  }
+  const data = collectAllFieldValues();
+  await sharedSet(`client-log:${currentClientName}`, JSON.stringify(data));
+}
+
+async function clearDay(dayId){
+  if(currentMode === 'entrenador'){
+    alert('Esta acción solo la puede hacer el cliente desde su propio registro.');
+    return;
+  }
+  if(!confirm('¿Borrar todo el registro guardado de este día?')) return;
+  document.querySelectorAll(`[id^="d${dayId}"]`).forEach(el => { if(el.tagName === 'INPUT') el.value = ''; });
+  if(currentClientName){
+    const data = collectAllFieldValues();
+    await sharedSet(`client-log:${currentClientName}`, JSON.stringify(data));
+  }
+}
+
+// ---------- HISTORIAL DE SESIONES (progresión semana a semana) ----------
+let currentHistory = [];
+let currentHistoryOwner = null;
+
+async function saveSessionToHistory(dayNum){
+  if(currentMode === 'entrenador'){
+    alert('Esta acción solo la puede hacer el cliente desde su propio registro.');
+    return;
+  }
+  if(!currentClientName){
+    alert('Primero escribe y guarda tu nombre arriba.');
+    return;
+  }
+  const day = (currentViewedRoutine && currentViewedRoutine.days) ? currentViewedRoutine.days[dayNum - 1] : null;
+  if(!day || !(day.exercises || []).length){
+    alert('Este día no tiene ejercicios asignados todavía.');
+    return;
+  }
+  const dateEl = document.getElementById(`d${dayNum}-fecha`);
+  const date = (dateEl && dateEl.value) ? dateEl.value : new Date().toISOString().slice(0, 10);
+  const exercises = day.exercises.map((ex, ei) => {
+    const uid = `d${dayNum}e${ei+1}`;
+    const peso = document.getElementById(`${uid}-peso`)?.value || '';
+    const rpe = document.getElementById(`${uid}-rpe`)?.value || '';
+    const setCount = parseSeriesCount(ex.series);
+    const repsPorSerie = [];
+    for(let si = 1; si <= setCount; si++){
+      const v = document.getElementById(`${uid}-set${si}`)?.value || '';
+      if(v !== '') repsPorSerie.push(v);
+    }
+    return { name: ex.name, peso, reps: repsPorSerie.join(' / '), rpe };
+  }).filter(e => e.peso || e.reps || e.rpe);
+
+  if(!exercises.length){
+    alert('No hay datos anotados en este día todavía. Llena al menos un ejercicio antes de guardar la sesión.');
+    return;
+  }
+
+  const raw = await sharedGet(`history:${currentClientName}`);
+  let history = [];
+  try{ history = raw ? JSON.parse(raw) : []; }catch(e){ history = []; }
+  history.push({ date, dayNum, dayTitle: day.title, savedAt: new Date().toISOString(), exercises });
+  await sharedSet(`history:${currentClientName}`, JSON.stringify(history));
+  currentHistory = history;
+  currentHistoryOwner = currentClientName;
+  renderHistoryList();
+  populateChartExerciseOptions();
+  renderProgressChart();
+  alert('Sesión guardada en tu historial ✅');
+}
+
+async function loadHistoryFor(name){
+  if(!name){
+    currentHistory = [];
+    currentHistoryOwner = null;
+    renderHistoryList();
+    populateChartExerciseOptions();
+    renderProgressChart();
+    return;
+  }
+  const raw = await sharedGet(`history:${name}`);
+  try{ currentHistory = raw ? JSON.parse(raw) : []; }catch(e){ currentHistory = []; }
+  currentHistoryOwner = name;
+  renderHistoryList();
+  populateChartExerciseOptions();
+  renderProgressChart();
+}
+
+function renderHistoryList(){
+  const listEl = document.getElementById('history-list');
+  const filterEl = document.getElementById('history-day-filter');
+  if(!listEl || !filterEl) return;
+  const filter = filterEl.value;
+  let entries = (currentHistory || []).slice();
+  if(filter !== 'all') entries = entries.filter(e => String(e.dayNum) === filter);
+  entries.sort((a, b) => (b.date || '').localeCompare(a.date || '') || (b.savedAt || '').localeCompare(a.savedAt || ''));
+
+  if(!entries.length){
+    listEl.innerHTML = `<div class="history-empty">Todavía no hay sesiones guardadas en el historial.</div>`;
+    return;
+  }
+
+  listEl.innerHTML = entries.map(e => `
+    <div class="history-entry">
+      <div class="history-entry-head">
+        <span class="h-date">${escapeHtml(e.date || 'Sin fecha')}</span>
+        <span>${escapeHtml(e.dayTitle || ('Día ' + e.dayNum))}</span>
+      </div>
+      <table class="history-table">
+        <tr><th>Ejercicio</th><th>Kg</th><th>Reps</th><th>RPE</th></tr>
+        ${e.exercises.map(ex => `<tr><td>${escapeHtml(ex.name)}</td><td>${escapeHtml(ex.peso || '—')}</td><td>${escapeHtml(ex.reps || '—')}</td><td>${escapeHtml(ex.rpe || '—')}</td></tr>`).join('')}
+      </table>
+    </div>
+  `).join('');
+}
+
+// ---------- GRÁFICA DE PROGRESO (peso por ejercicio a lo largo del tiempo) ----------
+let progressChartInstance = null;
+
+function populateChartExerciseOptions(){
+  const sel = document.getElementById('chart-exercise-select');
+  if(!sel) return;
+  const prevVal = sel.value;
+  const names = new Set();
+  (currentHistory || []).forEach(entry => {
+    (entry.exercises || []).forEach(ex => { if(ex.name) names.add(ex.name); });
+  });
+  const sortedNames = Array.from(names).sort((a, b) => a.localeCompare(b));
+  sel.innerHTML = '<option value="">Selecciona un ejercicio…</option>' +
+    sortedNames.map(n => `<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`).join('');
+  if(sortedNames.includes(prevVal)) sel.value = prevVal;
+}
+
+function renderProgressChart(){
+  const sel = document.getElementById('chart-exercise-select');
+  const canvas = document.getElementById('progress-chart');
+  const emptyMsg = document.getElementById('chart-empty-msg');
+  if(!sel || !canvas) return;
+  const exerciseName = sel.value;
+
+  if(progressChartInstance){ progressChartInstance.destroy(); progressChartInstance = null; }
+
+  if(!exerciseName){
+    canvas.style.display = 'none';
+    emptyMsg.style.display = 'block';
+    emptyMsg.textContent = 'Selecciona un ejercicio para ver su progreso.';
+    return;
+  }
+
+  const points = [];
+  (currentHistory || []).forEach(entry => {
+    const ex = (entry.exercises || []).find(e => e.name === exerciseName);
+    if(ex && ex.peso && !isNaN(parseFloat(ex.peso))){
+      points.push({ date: entry.date || '', peso: parseFloat(ex.peso) });
+    }
+  });
+  points.sort((a, b) => a.date.localeCompare(b.date));
+
+  if(points.length < 2){
+    canvas.style.display = 'none';
+    emptyMsg.style.display = 'block';
+    emptyMsg.textContent = 'Guarda al menos 2 sesiones con peso registrado en este ejercicio para ver su progreso.';
+    return;
+  }
+
+  canvas.style.display = 'block';
+  emptyMsg.style.display = 'none';
+
+  progressChartInstance = new Chart(canvas.getContext('2d'), {
+    type: 'line',
+    data: {
+      labels: points.map(p => p.date),
+      datasets: [{
+        label: 'Peso (kg)',
+        data: points.map(p => p.peso),
+        borderColor: '#B8763E',
+        backgroundColor: 'rgba(184,118,62,0.15)',
+        borderWidth: 2,
+        pointBackgroundColor: '#0B0B0C',
+        pointRadius: 4,
+        tension: 0.2,
+        fill: true
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: false, ticks: { font: { size: 10 } } },
+        x: { ticks: { font: { size: 9 } } }
+      }
+    }
+  });
+}
+
+
+async function enterEntrenadorMode(){
+  document.getElementById('editor-section').style.display = 'none';
+  await refreshClientList();
+}
+
+async function refreshClientList(){
+  const raw = await sharedGet('clients-list');
+  let list = [];
+  try{ list = raw ? JSON.parse(raw) : []; }catch(e){ list = []; }
+  const sel = document.getElementById('cliente-selector');
+  const prevVal = sel.value;
+  sel.innerHTML = '<option value="">Selecciona un cliente…</option>' +
+    list.map(n => `<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`).join('');
+  if(list.includes(prevVal)) sel.value = prevVal;
+  document.getElementById('entrenador-status').textContent =
+    list.length ? `${list.length} cliente(s) registrado(s). Pulsa 🔄 para actualizar.` : 'Aún no hay clientes registrados. Regístralos abajo.';
+  await loadClientData();
+}
+
+async function registerNewClient(){
+  const input = document.getElementById('nuevo-cliente-input');
+  const name = input.value.trim();
+  if(!name){ alert('Escribe el nombre del cliente.'); return; }
+  await addToClientList(name);
+  input.value = '';
+  await refreshClientList();
+  const sel = document.getElementById('cliente-selector');
+  sel.value = name;
+  await loadClientData();
+  document.getElementById('entrenador-status').textContent = `${name} registrado. Ya puedes definir su perfil y su rutina abajo.`;
+}
+
+async function loadClientData(){
+  const sel = document.getElementById('cliente-selector');
+  const name = sel.value;
+  document.getElementById('editor-section').style.display = name ? 'block' : 'none';
+  document.getElementById('profile-editor-section').style.display = name ? 'block' : 'none';
+  document.getElementById('routine-editor').style.display = 'none';
+  document.getElementById('profile-editor').style.display = 'none';
+  document.getElementById('toggle-editor-btn').textContent = '✏️ Editar rutina de este cliente';
+  document.getElementById('toggle-profile-editor-btn').textContent = '✏️ Editar objetivo y perfil de este cliente';
+
+  if(!name){
+    renderRoutine(DEFAULT_ROUTINE);
+    renderProfile(DEFAULT_PROFILE);
+    currentViewedRoutine = DEFAULT_ROUTINE;
+    currentViewedProfile = DEFAULT_PROFILE;
+    setInputsReadonly(true);
+    clearAllInputs();
+    await loadHistoryFor(null);
+    await loadIntakeFor(null);
+    await loadNotesFor(null);
+    await loadRemindersFor(null);
+    return;
+  }
+
+  const rawProfile = await sharedGet(`profile:${name}`);
+  let profile = DEFAULT_PROFILE;
+  if(rawProfile){ try{ profile = JSON.parse(rawProfile); }catch(e){} }
+  currentViewedProfile = profile;
+  renderProfile(profile);
+
+  const rawRoutine = await sharedGet(`routine:${name}`);
+  let routine = DEFAULT_ROUTINE;
+  let hasCustom = false;
+  if(rawRoutine){ try{ routine = JSON.parse(rawRoutine); hasCustom = true; }catch(e){} }
+  currentViewedRoutine = routine;
+  renderRoutine(routine);
+  setInputsReadonly(true);
+
+  const rawLog = await sharedGet(`client-log:${name}`);
+  clearAllInputs();
+  if(rawLog){ try{ applyFieldValues(JSON.parse(rawLog)); }catch(e){} }
+  await loadHistoryFor(name);
+  await loadIntakeFor(name);
+  await loadNotesFor(name);
+  await loadRemindersFor(name);
+
+  document.getElementById('entrenador-status').textContent = hasCustom
+    ? `Mostrando rutina personalizada y registro de: ${name}`
+    : `${name} no tiene rutina personalizada aún — mostrando la rutina general. Puedes editarla abajo.`;
+}
+
+// ---------- EDITOR DE PERFIL/OBJETIVO (solo entrenador) ----------
+function buildProfileEditor(profile){
+  const container = document.getElementById('profile-editor');
+  container.innerHTML = PROFILE_FIELDS.map(f =>
+    `<div class="name-row" style="margin-bottom:6px;">
+      <label style="width:90px;font-size:0.75rem;color:var(--acero);flex-shrink:0;">${escapeHtml(f.label)}</label>
+      <input class="edit-input profile-field-input" data-key="${f.key}" style="flex:1;" value="${escapeHtml((profile && profile[f.key]) || '')}">
+    </div>`
+  ).join('') + `<button class="save-routine-btn" onclick="saveProfile()">💾 Guardar perfil de este cliente</button>`;
+}
+
+function toggleProfileEditor(){
+  const editorDiv = document.getElementById('profile-editor');
+  const isHidden = editorDiv.style.display === 'none' || !editorDiv.style.display;
+  if(isHidden){
+    buildProfileEditor(currentViewedProfile || DEFAULT_PROFILE);
+    editorDiv.style.display = 'block';
+    document.getElementById('toggle-profile-editor-btn').textContent = '✕ Cerrar editor (sin guardar)';
+  } else {
+    editorDiv.style.display = 'none';
+    document.getElementById('toggle-profile-editor-btn').textContent = '✏️ Editar objetivo y perfil de este cliente';
+  }
+}
+
+async function saveProfile(){
+  const sel = document.getElementById('cliente-selector');
+  const name = sel.value;
+  if(!name){ alert('Selecciona un cliente primero.'); return; }
+  const profile = {};
+  document.querySelectorAll('.profile-field-input').forEach(el => { profile[el.dataset.key] = el.value.trim(); });
+  await sharedSet(`profile:${name}`, JSON.stringify(profile));
+  currentViewedProfile = profile;
+  renderProfile(profile);
+  document.getElementById('profile-editor').style.display = 'none';
+  document.getElementById('toggle-profile-editor-btn').textContent = '✏️ Editar objetivo y perfil de este cliente';
+  document.getElementById('entrenador-status').textContent = `Perfil guardado para: ${name}`;
+}
+
+
+// ---------- EDITOR DE RUTINA (solo entrenador) ----------
+function buildEditorRow(ex){
+  ex = ex || {name:'', note:'', series:'2', reps:'12-15', rest:'60 s', video:''};
+  return `<div class="editor-row">
+    <input class="edit-input f-name" placeholder="Nombre del ejercicio" value="${escapeHtml(ex.name)}">
+    <input class="edit-input f-note" placeholder="Nota (opcional)" value="${escapeHtml(ex.note)}">
+    <input class="edit-input f-series" placeholder="Series" value="${escapeHtml(ex.series)}">
+    <input class="edit-input f-reps" placeholder="Reps" value="${escapeHtml(ex.reps)}">
+    <input class="edit-input f-rest" placeholder="Descanso" value="${escapeHtml(ex.rest)}">
+    <input class="edit-input f-video" placeholder="Link de video (opcional)" value="${escapeHtml(ex.video || '')}" style="flex:2;min-width:130px;">
+    <button class="row-del-btn" onclick="this.parentElement.remove()">✕</button>
+  </div>`;
+}
+
+function buildPickerHtml(){
+  const dayOptions = editingRoutineTemplate.days.map((d, i) => `<option value="${i+1}">Día ${i+1}</option>`).join('');
+  const catOptions = Object.keys(EXERCISE_LIBRARY).map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+  return `<div class="exercise-picker">
+    <div style="font-size:0.78rem;font-weight:700;margin-bottom:6px;color:var(--negro);">📚 Agregar ejercicio desde la biblioteca (incluye video demostrativo)</div>
+    <div class="picker-row">
+      <select id="picker-day">${dayOptions}</select>
+      <select id="picker-category" onchange="populatePickerExercises()"><option value="">Categoría…</option>${catOptions}</select>
+      <select id="picker-exercise"><option value="">Ejercicio…</option></select>
+      <button type="button" onclick="addFromLibrary()">+ Agregar</button>
+    </div>
+  </div>`;
+}
+
+function populatePickerExercises(){
+  const cat = document.getElementById('picker-category').value;
+  const sel = document.getElementById('picker-exercise');
+  const list = EXERCISE_LIBRARY[cat] || [];
+  sel.innerHTML = '<option value="">Ejercicio…</option>' + list.map(n => `<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`).join('');
+}
+
+function addFromLibrary(){
+  const dayNum = document.getElementById('picker-day').value;
+  const cat = document.getElementById('picker-category').value;
+  const exName = document.getElementById('picker-exercise').value;
+  if(!cat || !exName){ alert('Selecciona categoría y ejercicio de la biblioteca.'); return; }
+  addEditorRow(dayNum, {name: exName, note:'', series:'2', reps:'12-15', rest:'60 s', video: libraryVideoUrl(exName)});
+}
+
+function buildEditor(routine){
+  editingRoutineTemplate = JSON.parse(JSON.stringify(routine));
+  const container = document.getElementById('routine-editor');
+  const daysHtml = editingRoutineTemplate.days.map((day, di) => {
+    const dayNum = di + 1;
+    const rows = (day.exercises || []).map(ex => buildEditorRow(ex)).join('');
+    return `<div class="editor-day" data-day="${dayNum}">
+      <input class="edit-input editor-day-title-input" style="width:100%;font-weight:700;margin-bottom:6px;" placeholder="Título del día" value="${escapeHtml(day.title)}">
+      <input class="edit-input editor-day-warmup-input" style="width:100%;margin-bottom:6px;" placeholder="Notas / calentamiento de este día (usa este espacio para aclarar si no aplica)" value="${escapeHtml(day.warmup)}">
+      <div class="editor-rows">${rows}</div>
+      <button class="add-row-btn" onclick="addEditorRow(${dayNum})">+ Agregar ejercicio en blanco</button>
+      <input class="edit-input editor-day-rpe-input" style="width:100%;margin-top:6px;" placeholder="Nota final del día (RPE, aclaraciones, etc.)" value="${escapeHtml(day.rpeNote)}">
+    </div>`;
+  }).join('');
+  container.innerHTML =
+    `<button class="reset-routine-btn" onclick="resetEditorToDefault()">↺ Empezar desde la rutina general</button>` +
+    buildPickerHtml() +
+    daysHtml +
+    `<button class="save-routine-btn" onclick="saveRoutine()">💾 Guardar rutina para este cliente</button>`;
+}
+
+function addEditorRow(dayNum, prefill){
+  const rowsDiv = document.querySelector(`.editor-day[data-day="${dayNum}"] .editor-rows`);
+  if(rowsDiv) rowsDiv.insertAdjacentHTML('beforeend', buildEditorRow(prefill));
+}
+
+function resetEditorToDefault(){
+  buildEditor(DEFAULT_ROUTINE);
+  document.getElementById('routine-editor').style.display = 'block';
+}
+
+function toggleEditor(){
+  const editorDiv = document.getElementById('routine-editor');
+  const isHidden = editorDiv.style.display === 'none' || !editorDiv.style.display;
+  if(isHidden){
+    buildEditor(currentViewedRoutine || DEFAULT_ROUTINE);
+    editorDiv.style.display = 'block';
+    document.getElementById('toggle-editor-btn').textContent = '✕ Cerrar editor (sin guardar)';
+  } else {
+    editorDiv.style.display = 'none';
+    document.getElementById('toggle-editor-btn').textContent = '✏️ Editar rutina de este cliente';
+  }
+}
+
+async function saveRoutine(){
+  const sel = document.getElementById('cliente-selector');
+  const name = sel.value;
+  if(!name){ alert('Selecciona un cliente primero.'); return; }
+  if(!editingRoutineTemplate){ return; }
+
+  const days = editingRoutineTemplate.days.map((day, di) => {
+    const dayNum = di + 1;
+    const dayDiv = document.querySelector(`.editor-day[data-day="${dayNum}"]`);
+    const exercises = [];
+    let title = day.title, warmup = day.warmup, rpeNote = day.rpeNote;
+    if(dayDiv){
+      const titleInput = dayDiv.querySelector('.editor-day-title-input');
+      const warmupInput = dayDiv.querySelector('.editor-day-warmup-input');
+      const rpeInput = dayDiv.querySelector('.editor-day-rpe-input');
+      if(titleInput) title = titleInput.value.trim() || title;
+      if(warmupInput) warmup = warmupInput.value.trim();
+      if(rpeInput) rpeNote = rpeInput.value.trim();
+      dayDiv.querySelectorAll('.editor-row').forEach(row => {
+        const exName = row.querySelector('.f-name').value.trim();
+        if(!exName) return;
+        exercises.push({
+          name: exName,
+          note: row.querySelector('.f-note').value.trim(),
+          series: row.querySelector('.f-series').value.trim() || '2',
+          reps: row.querySelector('.f-reps').value.trim() || '',
+          rest: row.querySelector('.f-rest').value.trim() || '',
+          video: row.querySelector('.f-video').value.trim()
+        });
+      });
+    }
+    return { title, warmup, rpeNote, exercises };
+  });
+
+  const newRoutine = { days };
+  await sharedSet(`routine:${name}`, JSON.stringify(newRoutine));
+  currentViewedRoutine = newRoutine;
+  renderRoutine(newRoutine);
+  setInputsReadonly(true);
+  const rawLog = await sharedGet(`client-log:${name}`);
+  clearAllInputs();
+  if(rawLog){ try{ applyFieldValues(JSON.parse(rawLog)); }catch(e){} }
+  document.getElementById('routine-editor').style.display = 'none';
+  document.getElementById('toggle-editor-btn').textContent = '✏️ Editar rutina de este cliente';
+  document.getElementById('entrenador-status').textContent = `Rutina personalizada guardada para: ${name}`;
+  alert(`Rutina guardada para ${name}. La verá la próxima vez que abra su registro.`);
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+  renderRoutine(DEFAULT_ROUTINE);
+  renderProfile(DEFAULT_PROFILE);
+  renderHistoryList();
+  renderIntakeQuestions();
+  renderIntakeResults(null);
+  populateChartExerciseOptions();
+  renderProgressChart();
+  renderRemindersList();
+  applyNotesReadonly();
+  currentViewedRoutine = DEFAULT_ROUTINE;
+  currentViewedProfile = DEFAULT_PROFILE;
+  setInputsReadonly(true);
+  if(!storageAvailable){
+    document.getElementById('no-sync-warning').style.display = 'block';
+  }
+  currentMode = await localGet('app-mode');
+  if(currentMode === 'cliente'){ await enterClienteMode(); }
+  else if(currentMode === 'entrenador'){ await enterEntrenadorMode(); }
+  updateModeButtons();
+});
+</script>
+
+</body>
+</html>
