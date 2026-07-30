@@ -254,6 +254,7 @@
     transition:opacity 0.3s ease;
   }
   .saved-flash.show{opacity:1;}
+  .saved-flash.error{color:var(--alerta);}
 
   .mode-bar{
     background:var(--negro);
@@ -688,7 +689,7 @@
     </div>
 
     <div class="warn-banner" id="no-sync-warning" style="display:none;">
-      ⚠ Este archivo se abrió sin conexión al almacenamiento compartido de Claude (por ejemplo, si se abrió como archivo descargado en vez del enlace compartido). Los datos solo se guardarán en este teléfono y no se sincronizarán.
+      ⚠ Parece que no tienes conexión a internet en este momento. Puedes seguir viendo la información, pero lo que anotes no se guardará ni se sincronizará hasta que recuperes la conexión.
     </div>
   </div>
 
@@ -807,34 +808,56 @@ function toggleDay(btn){
   }
 }
 
-// --- Detección de almacenamiento compartido de Claude ---
-const storageAvailable = (typeof window.storage !== 'undefined' && window.storage !== null);
+// --- Almacenamiento: Firebase Firestore (compartido entre entrenador y clientes) ---
+// Manejador global: si algo falla inesperadamente, avisar en vez de fallar en silencio.
+window.addEventListener('error', (e) => {
+  console.error('Error capturado:', e.message, e.filename, e.lineno);
+  alert('⚠ Ocurrió un error inesperado: ' + e.message + '\n\nToma captura de pantalla de este mensaje y compártela con tu entrenador/soporte. Intenta la acción de nuevo.');
+});
 
+const FIREBASE_PROJECT_ID = 'bitacora-jga';
+const FIREBASE_API_KEY = 'AIzaSyCtf4LViSouy2LvIP1lUWPUX1VPpyVNAIU';
+const FIRESTORE_BASE = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/bitacora_data`;
+
+async function fsGet(key){
+  try{
+    const url = `${FIRESTORE_BASE}/${encodeURIComponent(key)}?key=${FIREBASE_API_KEY}`;
+    const res = await fetch(url);
+    if(res.status === 404) return null;
+    if(!res.ok) return null;
+    const data = await res.json();
+    return (data.fields && data.fields.value && 'stringValue' in data.fields.value) ? data.fields.value.stringValue : null;
+  }catch(e){ console.error('fsGet error:', e); return null; }
+}
+
+async function fsSet(key, value){
+  try{
+    const url = `${FIRESTORE_BASE}/${encodeURIComponent(key)}?updateMask.fieldPaths=value&key=${FIREBASE_API_KEY}`;
+    const res = await fetch(url, {
+      method: 'PATCH',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ fields: { value: { stringValue: value } } })
+    });
+    return res.ok;
+  }catch(e){ console.error('fsSet error:', e); return false; }
+}
+
+// Datos propios de este dispositivo (modo activo, nombre recordado) — no necesitan sincronizarse.
 async function localGet(key){
-  if(storageAvailable){
-    try{ const r = await window.storage.get(key, false); return r ? r.value : null; }catch(e){ return null; }
-  }
-  return localStorage.getItem(key);
+  try{ return localStorage.getItem(key); }catch(e){ return null; }
 }
 async function localSet(key, value){
-  if(storageAvailable){
-    try{ await window.storage.set(key, value, false); }catch(e){}
-  } else {
-    localStorage.setItem(key, value);
-  }
+  try{ localStorage.setItem(key, value); return true; }catch(e){ return false; }
 }
+
+// Datos compartidos entre el entrenador y sus clientes — viven en Firebase, con un reintento automático.
 async function sharedGet(key){
-  if(storageAvailable){
-    try{ const r = await window.storage.get(key, true); return r ? r.value : null; }catch(e){ return null; }
-  }
-  return localStorage.getItem(key); // sin sincronización real si no hay storageAvailable
+  return await fsGet(key);
 }
 async function sharedSet(key, value){
-  if(storageAvailable){
-    try{ await window.storage.set(key, value, true); }catch(e){}
-  } else {
-    localStorage.setItem(key, value);
-  }
+  let ok = await fsSet(key, value);
+  if(!ok) ok = await fsSet(key, value); // un reintento antes de darnos por vencidos
+  return ok;
 }
 
 function escapeHtml(str){
@@ -1327,7 +1350,10 @@ async function saveNotes(){
     trainerNotes: document.getElementById('trainer-notes').value,
     clientNotes: document.getElementById('client-notes').value
   };
-  await sharedSet(`notes:${name}`, JSON.stringify(notes));
+  const saved = await sharedSet(`notes:${name}`, JSON.stringify(notes));
+  if(!saved){
+    alert('⚠ No se pudo guardar la nota (falló la conexión). Vuelve a escribirla o inténtalo de nuevo en un momento.');
+  }
 }
 
 // ---------- RECORDATORIOS ----------
@@ -1362,7 +1388,12 @@ async function addReminder(){
     createdBy: currentMode === 'entrenador' ? 'Entrenador' : 'Cliente'
   };
   currentReminders.push(reminder);
-  await sharedSet(`reminders:${name}`, JSON.stringify(currentReminders));
+  const saved = await sharedSet(`reminders:${name}`, JSON.stringify(currentReminders));
+  if(!saved){
+    currentReminders.pop();
+    alert('⚠ No se pudo guardar el recordatorio (falló la conexión). Inténtalo de nuevo.');
+    return;
+  }
   textEl.value = '';
   dateEl.value = '';
   renderRemindersList();
@@ -1373,15 +1404,18 @@ async function toggleReminder(id){
   if(!name) return;
   const r = currentReminders.find(x => x.id === id);
   if(r) r.done = !r.done;
-  await sharedSet(`reminders:${name}`, JSON.stringify(currentReminders));
+  const saved = await sharedSet(`reminders:${name}`, JSON.stringify(currentReminders));
+  if(!saved){ if(r) r.done = !r.done; alert('⚠ No se pudo actualizar el recordatorio. Inténtalo de nuevo.'); }
   renderRemindersList();
 }
 
 async function deleteReminder(id){
   const name = getActiveClientName();
   if(!name) return;
+  const backup = currentReminders.slice();
   currentReminders = currentReminders.filter(x => x.id !== id);
-  await sharedSet(`reminders:${name}`, JSON.stringify(currentReminders));
+  const saved = await sharedSet(`reminders:${name}`, JSON.stringify(currentReminders));
+  if(!saved){ currentReminders = backup; alert('⚠ No se pudo borrar el recordatorio. Inténtalo de nuevo.'); }
   renderRemindersList();
 }
 
@@ -1475,17 +1509,24 @@ function setInputsReadonly(readonly){
     btn.style.display = readonly ? 'none' : 'inline-block';
   });
 }
-function flashSaved(dayId){
+function flashSaved(dayId, success){
   const flash = document.getElementById(`d${dayId}-flash`);
   if(!flash) return;
-  flash.classList.add('show');
+  if(success === false){
+    flash.textContent = '⚠ No guardado — reintenta';
+    flash.classList.add('show', 'error');
+  } else {
+    flash.textContent = 'Guardado ✓';
+    flash.classList.remove('error');
+    flash.classList.add('show');
+  }
   clearTimeout(flash._timeout);
-  flash._timeout = setTimeout(() => flash.classList.remove('show'), 1500);
+  flash._timeout = setTimeout(() => flash.classList.remove('show'), success === false ? 4000 : 1500);
 }
-function flashForId(id){
+function flashForId(id, success){
   const dayMatch = id.match(/^d(\d+)/);
   if(dayMatch){
-    flashSaved(dayMatch[1]);
+    flashSaved(dayMatch[1], success);
     const body = document.querySelectorAll('.day-body')[dayMatch[1]-1];
     if(body && body.style.maxHeight){ body.style.maxHeight = body.scrollHeight + "px"; }
   }
@@ -1537,8 +1578,13 @@ async function addToClientList(name){
   try{ list = raw ? JSON.parse(raw) : []; }catch(e){ list = []; }
   if(!list.includes(name)){
     list.push(name);
-    await sharedSet('clients-list', JSON.stringify(list));
+    const saved = await sharedSet('clients-list', JSON.stringify(list));
+    if(!saved){
+      alert('⚠ No se pudo registrar el nombre (falló la conexión). Vuelve a pulsar "Guardar" / "Registrar" para intentarlo de nuevo.');
+      return false;
+    }
   }
+  return true;
 }
 
 async function loadOwnRoutineAndLog(){
@@ -1568,14 +1614,14 @@ async function loadOwnRoutineAndLog(){
 }
 
 async function saveLog(id, value){
-  flashForId(id);
   if(currentMode === 'entrenador') return;
   if(!currentClientName){
     alert('Primero escribe y guarda tu nombre arriba (en la barra negra) para que tu avance quede registrado.');
     return;
   }
   const data = collectAllFieldValues();
-  await sharedSet(`client-log:${currentClientName}`, JSON.stringify(data));
+  const saved = await sharedSet(`client-log:${currentClientName}`, JSON.stringify(data));
+  flashForId(id, saved);
 }
 
 async function clearDay(dayId){
@@ -1791,7 +1837,8 @@ async function registerNewClient(){
   const input = document.getElementById('nuevo-cliente-input');
   const name = input.value.trim();
   if(!name){ alert('Escribe el nombre del cliente.'); return; }
-  await addToClientList(name);
+  const ok = await addToClientList(name);
+  if(!ok) return;
   input.value = '';
   await refreshClientList();
   const sel = document.getElementById('cliente-selector');
@@ -1881,7 +1928,11 @@ async function saveProfile(){
   if(!name){ alert('Selecciona un cliente primero.'); return; }
   const profile = {};
   document.querySelectorAll('.profile-field-input').forEach(el => { profile[el.dataset.key] = el.value.trim(); });
-  await sharedSet(`profile:${name}`, JSON.stringify(profile));
+  const saved = await sharedSet(`profile:${name}`, JSON.stringify(profile));
+  if(!saved){
+    alert('⚠ No se pudo guardar el perfil (falló la conexión). Vuelve a pulsar "Guardar perfil" para intentarlo de nuevo.');
+    return;
+  }
   currentViewedProfile = profile;
   renderProfile(profile);
   document.getElementById('profile-editor').style.display = 'none';
@@ -1978,51 +2029,83 @@ function toggleEditor(){
 }
 
 async function saveRoutine(){
-  const sel = document.getElementById('cliente-selector');
-  const name = sel.value;
-  if(!name){ alert('Selecciona un cliente primero.'); return; }
-  if(!editingRoutineTemplate){ return; }
-
-  const days = editingRoutineTemplate.days.map((day, di) => {
-    const dayNum = di + 1;
-    const dayDiv = document.querySelector(`.editor-day[data-day="${dayNum}"]`);
-    const exercises = [];
-    let title = day.title, warmup = day.warmup, rpeNote = day.rpeNote;
-    if(dayDiv){
-      const titleInput = dayDiv.querySelector('.editor-day-title-input');
-      const warmupInput = dayDiv.querySelector('.editor-day-warmup-input');
-      const rpeInput = dayDiv.querySelector('.editor-day-rpe-input');
-      if(titleInput) title = titleInput.value.trim() || title;
-      if(warmupInput) warmup = warmupInput.value.trim();
-      if(rpeInput) rpeNote = rpeInput.value.trim();
-      dayDiv.querySelectorAll('.editor-row').forEach(row => {
-        const exName = row.querySelector('.f-name').value.trim();
-        if(!exName) return;
-        exercises.push({
-          name: exName,
-          note: row.querySelector('.f-note').value.trim(),
-          series: row.querySelector('.f-series').value.trim() || '2',
-          reps: row.querySelector('.f-reps').value.trim() || '',
-          rest: row.querySelector('.f-rest').value.trim() || '',
-          video: row.querySelector('.f-video').value.trim()
-        });
-      });
+  try{
+    const sel = document.getElementById('cliente-selector');
+    const name = sel.value;
+    if(!name){ alert('Selecciona un cliente primero.'); return; }
+    if(!editingRoutineTemplate){
+      alert('⚠ No se pudo leer el formulario de edición (se perdió la referencia). Cierra el editor con "✕ Cerrar editor" y ábrelo de nuevo con "✏️ Editar rutina", luego intenta guardar otra vez.');
+      return;
     }
-    return { title, warmup, rpeNote, exercises };
-  });
 
-  const newRoutine = { days };
-  await sharedSet(`routine:${name}`, JSON.stringify(newRoutine));
-  currentViewedRoutine = newRoutine;
-  renderRoutine(newRoutine);
-  setInputsReadonly(true);
-  const rawLog = await sharedGet(`client-log:${name}`);
-  clearAllInputs();
-  if(rawLog){ try{ applyFieldValues(JSON.parse(rawLog)); }catch(e){} }
-  document.getElementById('routine-editor').style.display = 'none';
-  document.getElementById('toggle-editor-btn').textContent = '✏️ Editar rutina de este cliente';
-  document.getElementById('entrenador-status').textContent = `Rutina personalizada guardada para: ${name}`;
-  alert(`Rutina guardada para ${name}. La verá la próxima vez que abra su registro.`);
+    const days = editingRoutineTemplate.days.map((day, di) => {
+      const dayNum = di + 1;
+      const dayDiv = document.querySelector(`.editor-day[data-day="${dayNum}"]`);
+      const exercises = [];
+      let title = day.title, warmup = day.warmup, rpeNote = day.rpeNote;
+      if(dayDiv){
+        const titleInput = dayDiv.querySelector('.editor-day-title-input');
+        const warmupInput = dayDiv.querySelector('.editor-day-warmup-input');
+        const rpeInput = dayDiv.querySelector('.editor-day-rpe-input');
+        if(titleInput) title = titleInput.value.trim() || title;
+        if(warmupInput) warmup = warmupInput.value.trim();
+        if(rpeInput) rpeNote = rpeInput.value.trim();
+        dayDiv.querySelectorAll('.editor-row').forEach(row => {
+          const nameEl = row.querySelector('.f-name');
+          const exName = nameEl ? nameEl.value.trim() : '';
+          if(!exName) return;
+          exercises.push({
+            name: exName,
+            note: (row.querySelector('.f-note')?.value || '').trim(),
+            series: (row.querySelector('.f-series')?.value || '').trim() || '2',
+            reps: (row.querySelector('.f-reps')?.value || '').trim(),
+            rest: (row.querySelector('.f-rest')?.value || '').trim(),
+            video: (row.querySelector('.f-video')?.value || '').trim()
+          });
+        });
+      }
+      return { title, warmup, rpeNote, exercises };
+    });
+
+    const totalExercises = days.reduce((sum, d) => sum + d.exercises.length, 0);
+    console.log('saveRoutine: guardando', totalExercises, 'ejercicios para', name, days);
+
+    const newRoutine = { days };
+    const saved = await sharedSet(`routine:${name}`, JSON.stringify(newRoutine));
+    if(!saved){
+      alert('⚠ No se pudo guardar la rutina (falló la conexión con el almacenamiento). No se perdió lo que escribiste en el formulario — vuelve a pulsar "Guardar rutina" para intentarlo de nuevo.');
+      return;
+    }
+
+    // Verificación real: releer lo que se acaba de guardar para confirmar que sí quedó.
+    const verifyRaw = await sharedGet(`routine:${name}`);
+    let verifyOk = false;
+    if(verifyRaw){
+      try{
+        const verifyParsed = JSON.parse(verifyRaw);
+        const verifyTotal = (verifyParsed.days || []).reduce((sum, d) => sum + (d.exercises || []).length, 0);
+        verifyOk = (verifyTotal === totalExercises);
+      }catch(e){ verifyOk = false; }
+    }
+    if(!verifyOk){
+      alert('⚠ Se envió el guardado pero no se pudo confirmar que quedó bien registrado. Pulsa 🔄 para actualizar y revisa si la rutina aparece correctamente; si no, vuelve a guardar.');
+      return;
+    }
+
+    currentViewedRoutine = newRoutine;
+    renderRoutine(newRoutine);
+    setInputsReadonly(true);
+    const rawLog = await sharedGet(`client-log:${name}`);
+    clearAllInputs();
+    if(rawLog){ try{ applyFieldValues(JSON.parse(rawLog)); }catch(e){} }
+    document.getElementById('routine-editor').style.display = 'none';
+    document.getElementById('toggle-editor-btn').textContent = '✏️ Editar rutina de este cliente';
+    document.getElementById('entrenador-status').textContent = `Rutina personalizada guardada para: ${name} (${totalExercises} ejercicios)`;
+    alert(`Rutina guardada y verificada para ${name}: ${totalExercises} ejercicios en total. La verá la próxima vez que abra su registro.`);
+  }catch(err){
+    console.error('Error en saveRoutine:', err);
+    alert('⚠ Ocurrió un error al guardar la rutina: ' + err.message + '\n\nToma captura de este mensaje para reportarlo. Intenta de nuevo.');
+  }
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -2038,7 +2121,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   currentViewedRoutine = DEFAULT_ROUTINE;
   currentViewedProfile = DEFAULT_PROFILE;
   setInputsReadonly(true);
-  if(!storageAvailable){
+  if(!navigator.onLine){
     document.getElementById('no-sync-warning').style.display = 'block';
   }
   currentMode = await localGet('app-mode');
